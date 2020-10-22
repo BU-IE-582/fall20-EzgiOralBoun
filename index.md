@@ -1,6 +1,6 @@
-## Welcome to my GitHub Page for IE 582
+## Welcome to my GitHub Page for IE 582 (fall20)
 
-You can reach the [web page](https://bu-ie-582.github.io/fall20-EzgiOralBoun/).
+Here is the [web page](https://bu-ie-582.github.io/fall20-EzgiOralBoun/).
 
 # Homework Links:
 
