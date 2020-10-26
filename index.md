@@ -1,4 +1,4 @@
-Welcome to my Progress Journal
+Welcome to my Progress Journal!
 
 # Homework Links:
 
