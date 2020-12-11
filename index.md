@@ -10,6 +10,10 @@ Welcome to my Progress Journal!
 
 [Here](files/HW1/Homework1.html) you can find my Homework 1. R code for this homework is in [here](files/HW1/Homework1.R)
 
+## Homework 2 (Dec 11, 2020)
+
+[Here](files/HW2/Homework2.html) you can find my Homework 2. R code for this homework is in [here](files/HW2/Homework2.R)
+
 
 
 
