@@ -445,6 +445,14 @@ summary {
 ##     date, intersect, setdiff, union</code></pre>
 <pre><code>## Loading required package: Matrix</code></pre>
 <pre><code>## Loaded glmnet 4.0-2</code></pre>
+<pre><code>## 
+## Attaching package: &#39;CVXR&#39;</code></pre>
+<pre><code>## The following object is masked from &#39;package:dplyr&#39;:
+## 
+##     id</code></pre>
+<pre><code>## The following object is masked from &#39;package:stats&#39;:
+## 
+##     power</code></pre>
 <div id="reading-the-data" class="section level2">
 <h2>Reading the Data:</h2>
 <pre class="r"><code>hw3ConsData&lt;-read_csv(&quot;GercekZamanliTuketim-01012016-01122020.csv&quot;)</code></pre>
@@ -1476,59 +1484,101 @@ colnames(tempPartD_23h)&lt;-c(&quot;Date&quot;, &quot;Hour&quot;, &quot;Data Rea
 wideTestData&lt;-cbind(tempPartD_0h[,c(1,4,5)],tempPartD_1h[,c(4,5)],tempPartD_2h[,c(4,5)],tempPartD_3h[,c(4,5)],tempPartD_4h[,c(4,5)],tempPartD_5h[,c(4,5)],tempPartD_6h[,c(4,5)],tempPartD_7h[,c(4,5)],tempPartD_8h[,c(4,5)],tempPartD_9h[,c(4,5)],tempPartD_10h[,c(4,5)],tempPartD_11h[,c(4,5)],tempPartD_12h[,c(4,5)],tempPartD_13h[,c(4,5)],tempPartD_14h[,c(4,5)],tempPartD_15h[,c(4,5)],tempPartD_16h[,c(4,5)],tempPartD_17h[,c(4,5)],tempPartD_18h[,c(4,5)],tempPartD_19h[,c(4,5)],tempPartD_20h[,c(4,5)],tempPartD_21h[,c(4,5)],tempPartD_22h[,c(4,5)],tempPartD_23h[,c(4,5)] )</code></pre>
 <p>Lasso regression calculations:</p>
 <pre class="r"><code>lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_0h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_0h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_0h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## 0.002454 0.002454 0.002454 0.002454 0.002454 0.002454</code></pre>
+<pre class="r"><code>praModel_0h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_0h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_0h&lt;-predict(praModel_0h, newx= as.matrix(wideTestData[,-c(1)])) 
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_1h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_1h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_1h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004032 0.0004032 0.0004032 0.0004032 0.0004032 0.0004032</code></pre>
+<pre class="r"><code>praModel_1h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_1h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_1h&lt;-predict(praModel_1h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_2h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_2h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_2h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## 0.000348 0.000348 0.000348 0.000348 0.000348 0.000348</code></pre>
+<pre class="r"><code>praModel_2h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_2h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_2h&lt;-predict(praModel_2h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_3h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_3h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_3h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0005832 0.0005832 0.0005832 0.0005832 0.0005832 0.0005832</code></pre>
+<pre class="r"><code>praModel_3h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_3h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_3h&lt;-predict(praModel_3h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_4h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_4h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_4h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004261 0.0004261 0.0004261 0.0004261 0.0004261 0.0004261</code></pre>
+<pre class="r"><code>praModel_4h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_4h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_4h&lt;-predict(praModel_4h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_5h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_5h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_5h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##     Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+## 0.000482 0.000482 0.000482 0.000482 0.000482 0.000482</code></pre>
+<pre class="r"><code>praModel_5h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_5h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_5h&lt;-predict(praModel_5h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_6h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_6h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_6h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004756 0.0004756 0.0004756 0.0004756 0.0004756 0.0004756</code></pre>
+<pre class="r"><code>praModel_6h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_6h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_6h&lt;-predict(praModel_6h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_7h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_7h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_7h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0003316 0.0003316 0.0003316 0.0003316 0.0003316 0.0003316</code></pre>
+<pre class="r"><code>praModel_7h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_7h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_7h&lt;-predict(praModel_7h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_8h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_8h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_8h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0008497 0.0008497 0.0008497 0.0008497 0.0008497 0.0008497</code></pre>
+<pre class="r"><code>praModel_8h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_8h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_8h&lt;-predict(praModel_8h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_9h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_9h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_9h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0003714 0.0003714 0.0003714 0.0003714 0.0003714 0.0003714</code></pre>
+<pre class="r"><code>praModel_9h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_9h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_9h&lt;-predict(praModel_9h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_10h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_10h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_10h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0006302 0.0006302 0.0006302 0.0006302 0.0006302 0.0006302</code></pre>
+<pre class="r"><code>praModel_10h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_10h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_10h&lt;-predict(praModel_10h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_11h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_11h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_11h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0008995 0.0008995 0.0008995 0.0008995 0.0008995 0.0008995</code></pre>
+<pre class="r"><code>praModel_11h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_11h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_11h&lt;-predict(praModel_11h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_12h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_12h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_12h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+## 0.00075 0.00075 0.00075 0.00075 0.00075 0.00075</code></pre>
+<pre class="r"><code>praModel_12h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_12h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_12h&lt;-predict(praModel_12h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_13h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_13h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_13h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0003548 0.0003548 0.0003548 0.0003548 0.0003548 0.0003548</code></pre>
+<pre class="r"><code>praModel_13h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_13h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_13h&lt;-predict(praModel_13h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_14h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
@@ -1536,69 +1586,111 @@ praModel_14h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_14h[,3],alpha=
 predict_14h&lt;-predict(praModel_14h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_15h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_15h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_15h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004545 0.0004545 0.0004545 0.0004545 0.0004545 0.0004545</code></pre>
+<pre class="r"><code>praModel_15h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_15h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_15h&lt;-predict(praModel_15h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_16h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_16h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_16h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0004124 0.0004124 0.0004124 0.0004124 0.0004124 0.0004124</code></pre>
+<pre class="r"><code>praModel_16h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_16h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_16h&lt;-predict(praModel_16h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_17h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_17h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_17h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0005261 0.0005261 0.0005261 0.0005261 0.0005261 0.0005261</code></pre>
+<pre class="r"><code>praModel_17h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_17h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_17h&lt;-predict(praModel_17h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_18h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_18h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_18h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0002924 0.0002924 0.0002924 0.0002924 0.0002924 0.0002924</code></pre>
+<pre class="r"><code>praModel_18h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_18h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_18h&lt;-predict(praModel_18h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_19h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_19h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_19h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0005385 0.0005385 0.0005385 0.0005385 0.0005385 0.0005385</code></pre>
+<pre class="r"><code>praModel_19h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_19h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_19h&lt;-predict(praModel_19h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_20h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_20h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_20h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0002599 0.0002599 0.0002599 0.0002599 0.0002599 0.0002599</code></pre>
+<pre class="r"><code>praModel_20h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_20h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_20h&lt;-predict(praModel_20h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_21h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_21h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_21h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0003697 0.0003697 0.0003697 0.0003697 0.0003697 0.0003697</code></pre>
+<pre class="r"><code>praModel_21h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_21h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_21h&lt;-predict(praModel_21h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_22h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_22h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_22h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0002632 0.0002632 0.0002632 0.0002632 0.0002632 0.0002632</code></pre>
+<pre class="r"><code>praModel_22h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_22h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_22h&lt;-predict(praModel_22h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc&lt;-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_23h[,3], type.measure=&#39;mse&#39;, nfolds=10, family=&#39;gaussian&#39;, alpha=1)$lambda.min
-praModel_23h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_23h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
+summary(lambdaCalc)</code></pre>
+<pre><code>##      Min.   1st Qu.    Median      Mean   3rd Qu.      Max. 
+## 0.0002593 0.0002593 0.0002593 0.0002593 0.0002593 0.0002593</code></pre>
+<pre class="r"><code>praModel_23h&lt;-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_23h[,3],alpha=1,family=&#39;gaussian&#39;,lambda = lambdaCalc)
 predict_23h&lt;-predict(praModel_23h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdas&lt;-rbind(praModel_0h$lambda,praModel_1h$lambda,praModel_2h$lambda,praModel_3h$lambda,praModel_4h$lambda,praModel_5h$lambda,praModel_6h$lambda,praModel_7h$lambda,praModel_8h$lambda,praModel_9h$lambda,praModel_10h$lambda,praModel_11h$lambda,praModel_12h$lambda,praModel_13h$lambda,praModel_14h$lambda,praModel_15h$lambda,praModel_16h$lambda,praModel_17h$lambda,praModel_18h$lambda,praModel_19h$lambda,praModel_20h$lambda,praModel_21h$lambda,praModel_22h$lambda,praModel_23h$lambda)</code></pre>
+<p>Above, we see from “summary(lambdaCalc)” that lambda values (mean, 1st Q. etc.) are almost identical for each case.</p>
 <p>Lambda values for each hour (starting from 00.00 to 23.00) are as follows:</p>
 <pre class="r"><code>lambdas</code></pre>
 <pre><code>##               [,1]
 ##  [1,] 0.0024543896
-##  [2,] 0.0005849828
-##  [3,] 0.0005541301
+##  [2,] 0.0004032060
+##  [3,] 0.0003480098
 ##  [4,] 0.0005831551
-##  [5,] 0.0003537925
-##  [6,] 0.0004391783
-##  [7,] 0.0005219987
-##  [8,] 0.0005795249
-##  [9,] 0.0005856860
-## [10,] 0.0007818405
-## [11,] 0.0009142460
-## [12,] 0.0005648845
-## [13,] 0.0006833308
-## [14,] 0.0006200089
-## [15,] 0.0003762594
-## [16,] 0.0003438386
-## [17,] 0.0007207178
-## [18,] 0.0004367433
+##  [5,] 0.0004261443
+##  [6,] 0.0004819976
+##  [7,] 0.0004756258
+##  [8,] 0.0003316254
+##  [9,] 0.0008497301
+## [10,] 0.0003714376
+## [11,] 0.0006301543
+## [12,] 0.0008994558
+## [13,] 0.0007499547
+## [14,] 0.0003547919
+## [15,] 0.0006575240
+## [16,] 0.0004545344
+## [17,] 0.0004124212
+## [18,] 0.0005260588
 ## [19,] 0.0002924305
-## [20,] 0.0002807920
-## [21,] 0.0002852351
-## [22,] 0.0004057436
-## [23,] 0.0003170795
-## [24,] 0.0003762161</code></pre>
+## [20,] 0.0005385338
+## [21,] 0.0002598956
+## [22,] 0.0003696985
+## [23,] 0.0002632449
+## [24,] 0.0002593111</code></pre>
+<pre class="r"><code>summary(praModel_0h)</code></pre>
+<pre><code>##           Length Class     Mode   
+## a0         1     -none-    numeric
+## beta      48     dgCMatrix S4     
+## df         1     -none-    numeric
+## dim        2     -none-    numeric
+## lambda     1     -none-    numeric
+## dev.ratio  1     -none-    numeric
+## nulldev    1     -none-    numeric
+## npasses    1     -none-    numeric
+## jerr       1     -none-    numeric
+## offset     1     -none-    logical
+## call       6     -none-    call   
+## nobs       1     -none-    numeric</code></pre>
 <pre class="r"><code>mapePartD_0h&lt;-mape(predict_0h,tempPartD_0h[,3])
 mapePartD_1h&lt;-mape(predict_1h,tempPartD_1h[,3])
 mapePartD_2h&lt;-mape(predict_2h,tempPartD_2h[,3])
@@ -1628,42 +1720,92 @@ mapePartD&lt;-rbind(mapePartD_0h,mapePartD_1h,mapePartD_2h,mapePartD_3h,mapePart
 mapePartD</code></pre>
 <pre><code>##                   [,1]
 ## mapePartD_0h  1.404880
-## mapePartD_1h  1.546629
-## mapePartD_2h  1.475998
+## mapePartD_1h  1.564561
+## mapePartD_2h  1.493677
 ## mapePartD_3h  1.398704
-## mapePartD_4h  1.490239
-## mapePartD_5h  1.417548
-## mapePartD_6h  1.714450
-## mapePartD_7h  1.805853
-## mapePartD_8h  2.600464
-## mapePartD_9h  3.666653
-## mapePartD_10h 4.098995
-## mapePartD_11h 4.350395
-## mapePartD_12h 4.623503
-## mapePartD_13h 4.469409
-## mapePartD_14h 4.311923
-## mapePartD_15h 3.816874
-## mapePartD_16h 2.921651
-## mapePartD_17h 2.084006
+## mapePartD_4h  1.483494
+## mapePartD_5h  1.411261
+## mapePartD_6h  1.718660
+## mapePartD_7h  1.806174
+## mapePartD_8h  2.615643
+## mapePartD_9h  3.629341
+## mapePartD_10h 4.085926
+## mapePartD_11h 4.360189
+## mapePartD_12h 4.621653
+## mapePartD_13h 4.475183
+## mapePartD_14h 4.313728
+## mapePartD_15h 3.819481
+## mapePartD_16h 2.907557
+## mapePartD_17h 2.087530
 ## mapePartD_18h 1.650508
-## mapePartD_19h 1.562751
-## mapePartD_20h 1.637953
-## mapePartD_21h 1.683320
-## mapePartD_22h 1.623328
-## mapePartD_23h 1.833610</code></pre>
+## mapePartD_19h 1.556703
+## mapePartD_20h 1.637068
+## mapePartD_21h 1.683014
+## mapePartD_22h 1.625361
+## mapePartD_23h 1.830164</code></pre>
 <p>Above, we can see the Mape results for each hour. First of all, when we compare these results with Part C, we can say that the Mape values dramatically decrease for every hour. This means that penalized regression model is better than the linear regression model. We observe a similar difference between working hours and night hours like in Part C. It is possible to say that this regression model is almost excellent because the Mape values are very low.</p>
 <p>We do not observe any relation between lambdas and Mape values.</p>
 </div>
 <div id="part-e" class="section level2">
 <h2>PART E</h2>
+<p>Using fused penalties:</p>
+<pre class="r"><code>yTestPartE &lt;-cbind(tempPartD_0h[,3],tempPartD_1h[,3],tempPartD_2h[,3],tempPartD_3h[,3],tempPartD_4h[,3],tempPartD_5h[,3],tempPartD_6h[,3],tempPartD_7h[,3],tempPartD_8h[,3],tempPartD_9h[,3],tempPartD_10h[,3],tempPartD_11h[,3],tempPartD_12h[,3],tempPartD_13h[,3],tempPartD_14h[,3],tempPartD_15h[,3],tempPartD_16h[,3],tempPartD_17h[,3],tempPartD_18h[,3],tempPartD_19h[,3],tempPartD_20h[,3],tempPartD_21h[,3],tempPartD_22h[,3],tempPartD_23h[,3])
+wideFirstStep_PartE&lt;-cbind(partD_0h[,c(1,3,4,5)],partD_1h[,c(3,4,5)],partD_2h[,c(3,4,5)],partD_3h[,c(3,4,5)],partD_4h[,c(3,4,5)],partD_5h[,c(3,4,5)],partD_6h[,c(3,4,5)],partD_7h[,c(3,4,5)],partD_8h[,c(3,4,5)],partD_9h[,c(3,4,5)],partD_10h[,c(3,4,5)],partD_11h[,c(3,4,5)],partD_12h[,c(3,4,5)],partD_13h[,c(3,4,5)],partD_14h[,c(3,4,5)],partD_15h[,c(3,4,5)],partD_16h[,c(3,4,5)],partD_17h[,c(3,4,5)],partD_18h[,c(3,4,5)],partD_19h[,c(3,4,5)],partD_20h[,c(3,4,5)],partD_21h[,c(3,4,5)],partD_22h[,c(3,4,5)],partD_23h[,c(3,4,5)] )
+beta&lt;-Variable(48)
+mapePartE&lt;-vector()
+for (i in 1:24)
+{
+indx&lt;-(i*3)-1
+yPartE&lt;-as.matrix(wideFirstStep_PartE[,c(indx)])
+xPartE&lt;-as.matrix(wideFirstStep[,c(-1)])
+  
+
+objectiveFunction&lt;-(sum_squares(yPartE-xPartE %*% beta) + max(lambdas)*sum(beta^2)) + max(lambdas)*p_norm(diff(beta, differences=1),1)
+resultsParams&lt;-solve(Problem(Minimize(objectiveFunction)))
+
+foundBeta&lt;-resultsParams$getValue(beta) 
+
+xTestPartE&lt;-as.matrix(wideTestData[,c(-1)])
+TestY&lt;-as.matrix(yTestPartE[,i])
+
+fusedPred&lt;-xTestPartE %*% foundBeta
+mapePartE[i]&lt;-mape(fusedPred,TestY)
+}
+as.matrix(mapePartE)</code></pre>
+<pre><code>##           [,1]
+##  [1,] 1.508786
+##  [2,] 1.696335
+##  [3,] 1.671185
+##  [4,] 1.553484
+##  [5,] 1.640851
+##  [6,] 1.588751
+##  [7,] 1.877268
+##  [8,] 1.984968
+##  [9,] 2.791114
+## [10,] 3.764788
+## [11,] 4.226773
+## [12,] 4.482834
+## [13,] 4.830812
+## [14,] 4.651283
+## [15,] 4.459459
+## [16,] 3.916176
+## [17,] 3.087740
+## [18,] 2.208915
+## [19,] 1.876274
+## [20,] 1.795444
+## [21,] 1.848747
+## [22,] 1.893164
+## [23,] 1.837952
+## [24,] 1.979459</code></pre>
+<p>Above, we can see the Mape results for each hour. First of all, when we compare these results with Part D, we can say that the Mape values are slightly bad for every hour. This may mean that penalized regression model is better than the fused penalty model. However, lambda values create an important difference in fused penalty approach. Therefore, selected lambda values for Part E might be wrong. For some lambda values, fused penalty approach might be slightly better then penalized regression model used in Part D. We observe a similar difference between working hours and night hours like in Part C and Part D. It is possible to say that this regression model is almost excellent because the Mape values are very low.</p>
 </div>
 <div id="part-f" class="section level2">
 <h2>PART F</h2>
 <p>The figure below shows the comparison of different approaches used in this assignment. It is a nice visualization to decide which one is the best or the worst.</p>
-<pre class="r"><code>boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD , names = c(&quot;Lag_48&quot;,&quot;Lag_168&quot;,&quot;Part B&quot;,&quot;Part C&quot;,&quot;Part D&quot;), xlab = &quot;Approaches&quot; , ylab = &quot;Mape Values (%)&quot;)</code></pre>
-<p><img src="data:image/png;base64,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" width="672" /></p>
-<p>If we really want to know whether our predictions are good or not, we have to compare them with the naive approaches. Those predictions with the naive approach can be seen as a baseline. Therefore, we see that the regression model we used in Part D (lasso regression) is the best and is very effective. The main reason for lasso regression having the best performance is because it uses penalized approach.</p>
-<p>All in all, it is obvious that there are other regression models or approaches which are better than the naive approach. Thus, for predictions, regression algorithms, especially with penalties, must be used to make really good predictions.</p>
+<pre class="r"><code>boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD ,mapePartE, names = c(&quot;Lag_48&quot;,&quot;Lag_168&quot;,&quot;Part B&quot;,&quot;Part C&quot;,&quot;Part D&quot;, &quot;Part E&quot;), xlab = &quot;Approaches&quot; , ylab = &quot;Mape Values (%)&quot;)</code></pre>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABUAAAAPACAMAAADDuCPrAAAA8FBMVEUAAAAAADoAAGYAOjoAOmYAOpAAZpAAZrY6AAA6AGY6OgA6Ojo6OmY6OpA6ZmY6ZpA6ZrY6kJA6kLY6kNtmAABmADpmOgBmOjpmOmZmZjpmZmZmZpBmkJBmkLZmkNtmtrZmtttmtv+QOgCQOjqQZgCQZjqQZmaQZraQkDqQkGaQkJCQkLaQtraQttuQ29uQ2/+2ZgC2Zjq2kDq2kGa2kJC2kLa2tpC2tra2ttu227a229u22/+2///T09PbkDrbkGbbtmbbtpDbtrbb25Db27bb29vb2//b/7bb////tmb/25D/27b/29v//7b//9v///887uQeAAAACXBIWXMAAB2HAAAdhwGP5fFlAAAgAElEQVR4nO3de4PTVp6gYRWXpTYwDbuwME2GHmCH7M502BTNTMgm2QqkIUNR4Pr+32Yl+Sa7BNg/H0tH8vP8EaoMdXzKlt/oZrm4ACCk6HsCAEMloABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKECSgAEECChAkoABBAgoQJKAAQQIKEJR3QAuAZNInKvmICfX9aAPjkrxRqQdMaQ//wwAOloACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIEDTegk7c//bH1D+3w6/b9yQFz4V8ASG1oAf391atfqj/P71cxOfrLlj8uoEA6wwro6+MqIdffX5wdz3JSfr2NEQRUQSEbgwro6SwhNz7dK9c+Hz78pvp6qxEEFEhnSAH9UK52Xvv+x3Lj/c9Fcbe6pSrqk22GGEFAw78AkNqQAnoy3WKfPC0WK54nW66CCiiQzoACWoWzXt08K7fff5jeVq6UbrUXVH+AdAYU0E/3iiu/rnyx8mXbVKzAAXskoABBAwpouQk/3XIvt9ttwgP9G1BAF0eMyj+nB+Hrw/BdHUQCWDOkgJ6V4bzz7t2Lori5XBft7DQmgDVDCmi96lm5/vcynLdfvXpWbPtWJAEF0hlUQCcv6n6Wa5/z9yR96RBSGwEF0hlUQC8u3n5389ajap3zt+mb4W9v91Z4AQUSGlhAlya/f/fw+62vZyegQDqDDWiMgALpCChAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBA0ooJPfX/2y6xgCCqQzoIB+ulcUd3ccQ0CBdAYW0OLO+53GEFAgnaEFtDh6vssYAgqkM6yAHv25TOjtHfaECiiQzrACeuXX347LldD4dryAAukMLaAX5/er7fg7f8TGEFAgncEF9GLy8rjaF3prg32hRYt9zQ44PMMLaJnQF3VCi1vff2U9VECBfRpiQBdroaWrt77dZoeogALpDDOgpbfPZglt3PZ1AgqkM9iAlt6+fCCgQH+GHNDK5N07m/BAP4Ye0C0JKJCOgAIEDSigk+8ebnXEvY2AAukMKKApCCiQjoACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoJFIk0PfvwHYEFNJI0U/L58AIKHTE0jc+AgodsfSNj4BCRyx94yOg0BFL3/gIKHTE0jc+AgodsfSNj4BCRyx94yOg0BFL3/gIKECQgAIECShAkIACBAkoQJCAAgQJKECQgEJHLH3jI6DQEUvf+AgodMTSNz4CCh2x9I2PgEJHLH3jI6DQEUvf+AgodMTSNz4CCh2x9I2PgEJHLH3jI6CwiSITfT8OrBBQ2EDf3Vzq+5GgSUBhA0Xx/7JgCc5LZwGdvH1V+Tn13W3H4keMgNKmm4CePztebIEcPfoj9V1uzuJHjIDSpouAvrm/thfn2vPUd7opix8xAkqb/Qd0ms+jWw+/L7fgf3z4YJrQnjblLX7ECCht9h3QyYsql39937jp48tvytvuvL/ogcWPGAGlzZ4D+qFc/bxzeZ/n+bNynfSH1Pe8AYsfMQJKm/0G9NO94vYvrf+qTOiVX1Pf9ddZ/IgRUNrsOaD/+PnDRef/uFNAP/7+6uft9wJY/IgRUNoM7ET6tw/q9dbJy+PY4XyLHzECSptBBXTyrKg3/CdPF2dEbXksyuJHjIDSZkgBrbtZBrT+8+jhw4fVauiNrYaw+BEjoLTpNKCT31+9+il++tJZ2cv//n765916vL9tezDf4keMgNKmw4BWG+CV29GEnsy6ebJc7zzZchXU4keMgNKmu4B+urd4J2fs8Hs5QL26Of+z8uG4uL5Njy1+xAgobboL6Elx9Lxs3eTN8XQ9cmtlOOtD8PM/L9a+bpmKqymSiIDSprvL2T2drzZ+ON5qpXFhHsvJUwGlawJKmz0HdPkuzk/35qVbfrWd6uD7k+qLk+Um/FlhE54uCCht9v1WzsV5muW64pPpV2fbNW/pdHoWaLXjc3bkqGrqVvsDLH7ECCht9v5e+KNHs1qW642P311cfHx9vOW5m83RimvVW+tP56cxvXAaE90QUNrseRO+Ttzj+sudj8KX667VmfO3vn/37m/lII9+rC9zv90BKYsfMQJKm70fRKquXDd9y3p9adBdzgOtN97XbHlA3+JHjIDSpoOj8Of3Z1veFxdvX716t9Pg86uIRD8bxOJHjIDSppPTmKpP9fjMdUG39/HHhw9ulm59+73L2dEVAaVNR+eBvj7u60M8Vln8iBFQ2nR1In217b04IN8fix8xAkqb7t7KOXlRJvRxzwm1+BEjoLTZf0Df/uvDh/9Uf4rx8oB8byx+xAgobfYd0A/3Z8fL62NI5w/6+0j4msWPGAGlzb4/1vi4KI5u3iyK+TU/kh6Q357FjxgBpc2eA3pSXJ+uej5dvH+zTGgfH2g8ZfEjRkBps+/3wi+vYbeo5uT1fxVQBkZAabPvgO56DbvELH7ECCht9hvQydOdr2GXlsWPGAGlzZ73gZ4Wxe1X7979/mzry37sh8WPGAGlzb4vZ/d0ft2PLFZABZQgAaXN3k+kf11fPimDd3HWLH7ECChtungr57vdLmGXksWPGAGlTXfvhc+CxY8YAaWNgMIGBJQ2ez6N6acv/MPfe9gtavEjRkBps+8T6a997n3v58/6OLPe4keMgNJmz2ugz4rizh8t/6i6sl0fJzZZ/IgRUNrsex/ob8dFcXv9AnZvHhTF0V9S3/EmLH7ECCht9v+xxvUFQf/0/fxUpnf//mB5fdDOWfyIEVDadHAU/s3smsrF0c3j6McRp2LxI0ZAadPJaUxvHzQ/zL241d816S1+xAgobbo6D/TNd/Xq59HNb790ZtPeWfyIEVDaOJEeNiCgtBFQ2ICA0kZAYQMCShsBhQ0IKG0EFDYgoLQRUNiAgNJGQGEDAkobAYUNCChtBBQ2IKC0EVDYgIDSRkBhAwJKGwGFDQgobboNaPUh8bf7uRLolMWPGAGlTUcBfXO/+gSk0+llQX9IfZebs/gRI6C06SagZTnLgH6YXU+5j0+Tm7H4ESOgtOkkoFU5y2rWGZ08LYq7qe9zYxY/YgSUNp0E9LT+CM4qnTcuLs7q//bE4keMgNKmi4CW5az2e1broU+qz4rvcRve4keMgNKmi4DOknk6PX4koAyQgNKmw4CeTA8fCSgDJKC06S6gs12g1Zb89fep73RTFj9iBJQ2He0DLZ7Md4FWK6IOIjE0Akqbro7CX/v5X+ot+MnfimlH+2HxI0ZAadNJQMtt+Nrd6Vf9rYAKKEECSptu3ok0fQ/S9fd1QO/0tgdUQIkSUNp09F74yZuH3/5c/vnpf9z+OfUdbsPiR4yA0sbl7GADAkobAYUNCChtugvox1evfnp/Mfkj9f1txeJHjIDSpquAvv5meh27T/euuaAywyOgtOkooC/mFwL9dM8FlRkgAaVNZxdULq792/HsDZ39vZNTQAkSUNp0dkHlx+XKZ3URken7Ovti8SNGQGnTSUCnb3+fBtQFlRkiAaVNhxdUngXU1ZgYIAGlTYfXA50F1PVAGSABpY2AwgYElDY24WEDAkqbrg4i3V0E9NRBJIZHQGnTSUDPZufQVwE9c0FlBkhAadNJQKtzP4+eVwGtL0jvRHoGR0Bp0807keaXpK95KyfDI6C06eqCyk8X/XQxEQZIQGnT2eXszp9V12M66veC9AJKkIDSZqgXVJ78/uqnwKVFLX7ECChthhTQj+/myXxzf7o3devPp7P4ESOgtBlQQBdvYZq8WB6Q2vKMKIsfMQJKm07eifTdw1Xfhs5jWgT0pCrnnx4+fFBsfU6pxY8YAaVNR++FXxV7L/w8oNWp+NNt9/On245l8SNGQGkzwICeLN8LWp0ddXeryVn8CBFQ2nSyD/Tju7kfnxVHj9/FPplzFtCVS9qfbfm+JosfMQJKm84PIn04Lh7HBl5cFa+xBvvla+MVLWL3zaETUNp0fxT+NPpeTgGlPwJKm+4DWq6Cxi5nt9wHuixwOdhWO1QtfsQIKG26D2j4ivTVD/5wUe/3XBw4sg+UbggobXpZAw0HtHT1n37+l8UqaHWTo/B0QEBp08c+0OAFQZtnQ9UJnvx27DxQuiGgtOk4oJN31RWVox/pMXn78sHxMqBVUbc8IGXxI0ZAadPHifS7XVG5rug8oNteXNTiR4yA0qaHgB4FzwO9ZPIfW1+b2eJHjIDSppOAPri5dOtR7H1IaVj8iBFQ2gzocnYpWPyIEVDaCChsQEBpI6CwAQGljYDCBgSUNvsN6KUrge5yPdAkk7P4ESKgtBFQ2ICA9qS1INva5/SSj9j4euUEpsapTALKwAhoP5L0c7ABzc6hLX6kIqC56vcREVDYgIDmSkA7ZPEjRkBzdYABfRe6nF0KFj9iBDRXBxHQyY8P525+4yg8gyOguTqEgJ4drxwTE1CGRkBzdQAB/bDaz+K2TXgGRkBzdQABPa2i+eO94uifX94viqMnqe9ycxY/YgQ0V+MP6ORp/dFvJ0XxZIePRErC4keMgNKmoyvSV5/icVpntKppf6ugFj9iBJQ2HQW0Omx0Nv00ubP4h8rtzuJHjIDSpsOAfjiuN97L7/rbhrf4ESOgtOloH2gV0Fk5Zznth8WPGAGlTSdH4U/qfaDLjgooQyOgtOnqNKZqt+f0MPxZn4fhLX7ECChtOglodV3lMpplOq/8/Pd7DiIxPCMLaN4X2dzK+M8Drdc6y8326gymSrU935NsnnUGZlwBTdHPXF5KhxDQizf3692f9+t+Pk59l5vL5llnYMYV0A1+3U7uJoWDCOjcm4cPH/2R+h63MKDlgqwIaK5GHdA+Y9lmQMsFWRHQXI05oJ/uXXueevydDGi5ICsCmqtxB7Qoju5ktBo6oOWCrAhorsYe0NLVx/1df2nVgJYLsiKguRpzQC8u3j6YnvJw+5fU9xMyoOWCrAhorsYd0IuLyetv8lkNHdByQVYElDadnMb08cVxJquhlgtiDiygbKir80Bnm/J9r4Za/IgRUNp0dyL9fFP+9s+p73ELFj9iBJQ2nb4TabYpf/TI1ZgYGAGlTcdv5bx4+6zwufAMT5LLbyTR9yNBU9cBvZi8/EZAGZy+s7nU9yNBU7cBnbypr8ckoAxN39lc6vuRyM3YzwNdejM7Et/fLlABJajnajZ09Ot2cjcpHEhA652fRd/ngg5ouSAr/UazqaNft5O7SeEQAnr+bHomfe/XZhrQckFWeq5mQ0e/bid3k8LoA/rx5bSeOVyWaUDLBVk5sNOYBvRCGXdAq4PutVt9nj+/MKDlgqwIaK7GHNDFx8j1eNxoxYCWC7IioLkac0Cn1wPt/xoiCwNaLsiKgOZq5AG99jyTlc/agJYLsiKguRp1QP9X/8eNVgxouSArAkqbzt/K2S/LBTEHFlA2JKCwAQGljYDCBgSUNgIKGxBQ2ggobEBAaSOg9KiXN5O32WCmfadzyhKcFwGlR313c2GDmfadzilL8LoxnweaHYtfXvru5tLXZ9p3OqecB7pOQDs0oOXiIPSdzaWvz7TvdE4J6DoB7dCAlouD0Hc2FzaYad/pnBLQdYcS0I+vXv30/mLS73s7B7RcHIS+u7mwwUz7TueUgK47jIC+ri4LeuXXi0/3rvV5baYBLRdkRUBzdRABfVH/b74OaHH0Q+q73NyAlguyIqC5OoSAnpb1vPZvx2VAq0ssX/epnAyNgObqAAL64bgoHpcrn9XnwVcFfZL6Pjc2oOWCrAhorg4goCdFceNiFtCLs/qbngxouSArAkqbLgJarnRW+z1nAS1XR/vbhrdcEHNgAWVDXQT0073q8NE8oLPv+mHxI0ZAaSOgsAEBpY1NeNiAgNKmq4NIdxcBPU10EGnye/XOpi1Z/IgRUNp0EtCz2Tn0VUDLr9OcxhTaFWDxI0ZAadNJQKtzP4+eVwGd/K1IdSK9gNIhAc3VAZwHWsVuKfxWzo/vmt6WAf25/HOrq5NY/Ig5sIAO6IVyCAGt10FnwhcTWanw0laroQNaLsiKgObqIAJ6cXH+rLoe09Htn8MDCyj9EdBcHUhAE3h9XBb44dyfj4ujP5V/frvNHtUBLRdkRUBzJaAbO3/a2AOwwUGk0JVzoYWA5upQAjp5++rVq3c7Dv5budr5l+mXAkqHBDRXhxHQN/dnAbu12wXpz8txrtdDOI2JDglorg4hoI2D8PWbknZQnUl69PhCQOmUgObqEAJ6Uh2A/9NfX/37n3cv6MWHciX09nsBpUsCSpuu3spZ3JkeLJ+82OFM+pl6jOcCSocOLKBsqMMr0rd9E1Sd0PSnYwGlMwJKm46uB9pY6UxyObvzp1ufQ1+z+BEjoLTp8ILKrd+F/XYsoHRHQGnT0QWV0wf04vy77d6EVLP4EdP6NuJe9P1I0NTJPtDT5iVAfSonA9R3Npf6fiRo6iSgn+4XV+bnz6+ujnbN4kd/LH37cAjngU6eFfXJ7/U7iXY9i2kXFmH6M6Clz1R7u/eWg0gPbt6stj2uTv84ujl1q4cV0QEtF4zOgJa+zs7Xz8QOv0HCh2M64qVbUlzIM9XkhrMIQ3+6eaF0XMkvif8KKR+QesRLtwgoDEtXAe37rLCZvAOaEQGFDQjoxr9CygekHjH1gCkJKGxAQDf+FVI+IPWIqQdMSUBhAwK68a+Q8gGpR/z6P3mX5IPhIwQUNiCgG/8KKR+QesS2Gyc/Lj4M7uY3PZ5JL6CwAQHd+FdI+YDUI7bcdnbc+/H3KQGlP5a+NQLaNuLlmz6s9rO6nnxPLML0x9K3RkDbRrx802kVzR/vFUf//PJ+URw9ufwvumIRpj9dLX17Otd8axtMtO9yzuQd0Ooj5e7Wl6J/Usd09+sphwko/Tm090d+9dcV0LYRL90yuyL9aZ3Rqqb9rYIKKP3pLKB992hKQGMjXrpldgnl2YVAXQ+UAyWgmc50GAGdfRhS+V1/2/ACSn8ENNOZZh7Q2TWUZ+VM9ZEeIQLK/nSx23CjafTdoykBjY14+aaTeh/osqMCygil6KeA9iLzgJ5Od3tOD8Of9XkYXkAZvVyyJKCxES/fVF0QtIxmmc4rP//9noNIsEe5ZElAYyO23HZWv32zOoOp0uOHIgkoo5dLlgQ0NmLbjW/u17s/79f9fJz6LjcnoIxeLlkS0NiIX/rLNw8fPvoj9T1uQUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjdj85uO7Nv3tBRVQRi+XLAlobMTG1xl9IvxscgLK2OWSJQGNjdj4WkCha7lkSUBjIza+rgJ66+El33orJ+xLLlkS0NiIja/rNdCjXs/8XCWgjF4uWRLQ2Igr3719Vm2zX33U36d4rBBQRi+XLAlobMT1G6YNvfY8h4YeRkCTXFctgb4fhwOVS5YENDZiy21vHlSvp1vPU9/X1g7jRd13OOf6fhwOVC5ZEtDYiK23Tt7UFxLpu6GH8aLuO5wLfT8QhymXLAlobMTP/cXk5TfVi+r2z6nvcQuH8Zruu5sLfT8QhymXLAlobMQv/N20oUd3nMa0V313c67vx+FA5ZIlAY2N+OW/Pr/vRPp96zucc30/DgcqlywJaGzEL/zdbCteQGFvcsmSgMZG/NxffJzWs9cT6wWU0cslSwIaG7H11o8vj3uv54WAcgByyZKAxka8fFMm9bwQUA5ALlkS0NiIa9/nU88LAeUA5JIlAY2N2Pzm/F8zqueFgHIAcsmSgMZGbHw9vR5oLvW8EFAOQC5ZEtDYiI2vq4Be+6dX635yIj3sSy5ZEtDYiI2vXZEeupZLlgQ0NmLjawGFruWSJQGNjdj4evLd5c/z8JEesE+5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHvAz3r76afvPqhNQRi+XLAlobMTUA656V1/NfjL9sPlrz7f8aQFl9HLJkoDGRkw9YMP5s6qaP1xcnMw/XunOdgMIKKOXS5YENDZi6gGXPtSrncXRD2flf289fFh9e3erEQSU0cslSwIaGzH1gAv1Z3ze/KZcB71fRrS8YfKimH6xMQFl9HLJkoDGRkw94MJpUVz5ZbYe+qS+ZfJ0y1VQAWX0csmSgMZGTD3gXFXLuptlSK/PPhj5bPnlRgSU0cslSwIaGzH1gHPlFvyVX6svylXQG+u3tU+lxb5mB5nIJUsCGhsx9YBzi1iWXwgofEYuWRLQ2IipB5wrYzk9YjT5nzf/YbbdXq6MfiGglwkoo5dLlgQ0NmLqARdOLh8xOi0WK6MbEVBGL5csCWhsxNQDLpxdOmnp/J6j8LAqlywJaGzE1AMuVIfhi39YHnSv38+51UF4AWX8csmSgMZGTD3g0qf7RXOXZ3Vi/Xbn0Qso45dLlgQ0NmLqARvKdc7VgF77ZbsBBJTRyyVLAhobMfWAnzX5jy3zKaAcgFyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBUxJQRi+XLAlobMTUA6YkoIxeLlkS0NiIqQdMSUAZvVyyJKCxEVMPmJKAMnq5ZElAYyOmHjAlAWX0csmSgMZGTD1gSgLK6OWSJQGNjZh6wJQElBxCmJoAABLTSURBVNHLJUsCGhsx9YApCSijl0uWBDQ2YuoBmyYvH9z801/fL77/dK+48usWPy+gjF4uWRLQ2IipB2z47bioHD2aJ1RAYU0uWRLQ2IipB1w6LeauzwoqoLAmlywJaGzE1AMufCjXP689f/fuRfXnNJsCCmtyyZKAxkZMPeDC6XzN8/z+vKACCmtyyZKAxkZMPeDc5GlRPFl+WbdUQGFNLlkS0NiIqQeca8ayKuiNi68FtGixr9lBJnLJkoDGRkw94NxKLMtvirsCCpfkkiUBjY2YesC51Vh+OC6OfrAJD+tyyZKAxkZMPeBcYx9o5aworvwioLAmlywJaGzE1AMunE73eza+vfJ/BRRW5ZKlTQKajfiDHf3Jz46YesCF6jzQ238svz+pf3MBhSYBDYg/2NGf/OyIqQdcqt6J1Ozli6IQUFgloAHxBzv6k58dMfWADa+PV3tZfi+gsEJAA+IPdvQnPzti6gGbJm++fb/y/YtjAYUmAQ2IP9jRn/zsiKkHTElAGT0BDYg/2NGf/OyIqQdMSUAZvSEFtO85zgjohgSU0cslSwIaGzH1gCkJKKOXS5YENDZi6gFTElBGL5csCWhsxNQDpiSgjF4uWRLQ2IipB0xJQBm9XLIkoLERUw+YkoAyerlkSUBjI6YeMCUBZfRyyZKAxkZMPWBKAsro5ZIlAY2NmHrAlASU0ev7TT1LX59p3+WcEdANCSij13c2l74+077LOSOgGxJQRq/vbC59faZ9l3NGQDckoIxe39lcGs5MBXQzAsro9d2ipeHMVEA3I6CMXt8tWuro1+3kbjq796wTJaCMXi57FgU0NmLqAVMSUEZPQDskoDAuAtohAYVxObCA9ktAYVwEtEMCCuMioB0SUBgXAe2QgMK4CGiHBBTGRUA7JKAwLgLaIQGFcTmwgDoPtEMCyugJaIcEFMZFQDskoDAufV+DaamjX7eTu+ns3rNOlIAyen1nc6mjX7eTu+ns3rNOlIDCuAhohwQUxkVAOySgMCiZ70sQUCBbSfopoKkIKGzAC2VDAgqs80LZkIAC67xQNiSgwDovlA0JKLDOC2VDAgqs80LZkIAC67xQNiSgcHjyPrlyQAQUDk6KfnopVQQUIEhAAYIEFCBIQAGCBBQgSEABggQUIEhAAYIEFCBIQAGCBBQgSEABggQUIEhAAYIEFCBIQAGCBBQgSEABggQUIEhAAYIEFCDo4AIKkE7yRqUeMKW+H2xgXJI3KvWA4zGgHQimugfDmamp9mdkv05KA3qqTXUPhjNTU+3PyH6dlAb0VJvqHgxnpqban5H9OikN6Kk21T0YzkxNtT8j+3VSGtBTbap7MJyZmmp/RvbrpDSgp9pU92A4MzXV/ozs10lpQE+1qe7BcGZqqv0Z2a+T0oCealPdg+HM1FT7M7JfJ6UBPdWmugfDmamp9mdkv05KA3qqTXUPhjNTU+3PyH6dlAb0VJvqHgxnpqban5H9OikN6Kk21T0YzkxNtT8j+3VSGtBTbap7MJyZmmp/RvbrpDSgp9pU92A4MzXV/ozs10lpQE+1qe7BcGZqqv0Z2a+T0oCealPdg+HM1FT7M7JfJ6UBPdWmugfDmamp9mdkv05KA3qqTXUPhjNTU+3PyH6dlAb0VJvqHgxnpqban5H9OgDdEVCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCDqYgJ4Vxd10o304Lp4svnn77Lgojm7/suOYSWf46d6VX5ffTV7fLIri5uP3i1sSzXnhtFg4uvnoj01+5Pz5Z4fYcISIBBOtTd48ON7vTBM/pldvt/0aqaSda+3GPuaZnIBGfLpXLAI6eTF/xnccP+UMJ0+LRkA/HM9meG12W7I5L6wu/Ud/+foMX6zf98oQR48TTWwPE61ufHm8GOPO+5afSiH1Y1pc+2E/E710RwnmKqCZSRrQk2IZ0JPlU77bHSSc4aSc1DKgH5Yv9uvTF3uyOS+sL/1PvvYDl3/b0y1H6G2i9f+fGq7vqaDpH9OjPT2o+5irgOYlZUDPGotIVadqS/i8fE0d/bDjqIlmWL++FwGtVperFbp6ram+h3RzXjhtrJK/Pm7m+zNaX0CzISZv7u8tSwkmOn18rz2vNlTfPtjfSz3NYzq7ZfL2WZHs2b4s6fM/JAK6vapIiyf7dPH6OdnxHpLN8E29xrlYhE8XX5/NspRuzgsrS38V6K+9Fr78Aiof4j291hNMtF6BX9z2em9ry2ke0+Ut1RB7XFtO+fwPh4Burdq/+L8XT/bJ4pV+tuOqSKIZnpdrb8Xt+4uAltOdz3D+Zbo5L6wu/SdfH/YrL6CTTqoUm+iH45WbTveVpTSP6d2Vv9/jnpGkz/9gHHRAP76sDk4f3VocDjyvNshu/VKu/3zhJVE90acdBTQww9Nqg71xEKl8ua9Pa+8BXazirs3/pJz1m2/KX+Bly66ytYB2sQYanmjzwS+fiyvJzmZIP9XmMrVB2Hqdq4DmqyVPy73Ws9fD/Ib/9qWAlkG623iyVzaHd1oAEs3w9OjO++ZR+PZhE825OWTLC2h9/uUL6HV9MONfv/IC+vL/wvqdaLUHdOVBe9fFZnH4MW0++Wcb7Jzsc64Cmq8vH/W7O/sn68G6rHz5lH+3fLKrHaL1AZlnu27JJZrhx/cXK6cx1VM9r077vDo/NSjdnJtTXd2Eu9s2/5Piar1/9sb8F2l/AVUHkfZ1uGP3iZb/B91ThZJPdT2gHe1a3vX5H5LDDWhVkTv1gdTZId/qhmtlVqqDiJ/vynTbsvFk1/sca9d2e1mlmmGlEdBqwqdrM0w254W2gwiX5l8ffbn+S/tvu3oay7W9bBQnmejZ/g7FpJ7qekAvrTxnNtembh7jnR1uQJe7/2arFItdW186Wnm2+H/rYnk5n50UeHvHZzzRDGurAf3zYqmc35hqzguNB+Tdi9nsLs2/egHNp/2VF9A+T6TfcaJ9BHSHx7TzgCZ5/gU0N184xl0dBfi1uT/w88dV5/vmGsvLaaoXfZoZTi0DOj3nu9pg/1i9/ehG2jkvrJ+x/UPb/JtnTX31BbS/ox07TjTZgbf9T7XTgCZ+/gU0L5/L08ffv5ue9zt/ki/q/2F+5uk7mf2blYNI9XZKnafUB5ECM5xaC+jdxT3US3a6OS+cfv71s5j/yjGrL55IX5/0nfDSBUkn2uUaaILHtI+A7vj8D8khB3R2PYjKNE/z18VnjwEvnuPFF413xb/e8RBnkhnOf7C5Cb/8pyeLfVOJ5rzQeAFdvfV8fn+r8185OekrL6DTfR0v3n2iX/ufV0ZTbQno/g4iJX3+B+OAA9p4i3j19DZeF5/L0/KUysWT3dye2/GcoBQznFsN6GLY6V0knPNC69K/Nv9tXkDNy7UktftELx3KnuzpgkxpHtM+jsJH5yqg+Wo9xl397/Lb7//z3obrd2t7aaoBm8/66W6bnSlmOLd6GtNaQBPOeaFt6V+f/zYvoL1tbO4+0UtTK//FnTyn2nIeaCen10bnKqD5uvSEnS7Olfl0b8M9jF8J6I7vxUwxw7nVE+kX65unqefcnOulpX99/tkGdPuJrjz4yS4osJep9vFOpMVt4ed/MA42oI3dQdP3ZzResp87xt0S0D1uwkdm2PjZRmsXexOnM+xoE/7S/LfchN/PxmaCia69F35vb+9J85iuzrSb9yfUdnr+B0NAL87vFatnWVabHl/Z0lk82Y0Lz+y6eKacYfOCytVqx/Tfvp4Ok3DOC198Ac3nn8lBpF0nWv+PdHk1puM9rYAmekxXr8a0rxOwUj//g3GwAa26Um1gTK8tXj2v8/f5vPnq+3yaT3b15orFKUFpLyaywwybAa1eN9d+ns3wbto5L7Qt/Zfmv/YCWvsNmu/u2utpTLtOdHpq2NXqgysmbx58fWHpcarLgHZ3PdAd5iqg+Tpb2fgu67JyQ/28bvRe+Knlkz3dUz612/siU85w5SM9Ttd/KN2cF9qW/svzb7yApkdo194LvfYA7EOCiZYP4P3mT6R6O+wepvrl89uznutAcnq4Ab2Yfy7Q0aP5vsX5U/jFqzFdzP7l/OldfrzDjisiKWe4+plIv81PJ5m/czPZnBdaVx8uzb/xAppO4e7qED1VacuJXjQ/VGq/n4mU+DHd1wUG9jDXQkDzcjlPF/Xm19VH75dHVWZX22y5hOaaleXl7YP6Ey5/zmiGqwG9+Pjym+qqjI0ZJprzQvv21/r8m1f5nFSblM3Tf5rnYqeb2B4mWvv4sotP5Uz4mN78dm+PafK5CuiwfT2gfct/hnAIBHRheUbPvk7s21X+M4TDIqALZZSOqo8eqI5Nd3PF3G3lP0M4LAK60Hzn7t31XZJZ7JTJf4ZwWAR06fVxo05Z5in/GcJBEdCG+mD19AzpTPOU/wzhkAgoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoQJCAAgQJKECQgAIECShAkIACBAkoPTkriuvvu7qzydPi6Ieu7ozDIaD0o0xaUTzp8N4ElPQElH58OC4DeqOrexNQ9kJA6cdpcfRNd1ETUPZCQOnFp3vF9ddFcbejuxNQ9kJA6cVZGc8yold+7ebuBJS9EFB6cVIF7WR5GOnDcXHj4vxBURzd+aP9hvJfX3//5puiuPVL+c3kTflXxa3ni+P4H1/eLG84uvV8fsPkdflvj27/Mv2mDmjzlvpf3FwZY/r91Ud/7PH3ZlwElD6Uebz+vloNvbG84UZ9XKmYrSpeuqEK6Ov5t+f3i6lrsxyeFnOzc6M+zP7FUZ3oKqD/56R5y+wwVmOMxfed7Vhg8ASUPpzWlWpsWJf1+i9PZ/2qb7t0QxnQq3XibtR7UOemOwGW/Zzlb/kv6h+u7umb1R9Z9nJ6Q2PM7k6vYuAElB7My3m6WNurc1atCr4+nq6WXrqh2uAvrk9XFssvjx69v5i8nP1dFb96S//t/dkqaPUvHk/XVG9czM46PXpc/sjfZomtfuTa82q7fTZGOZdrP5d/nj/t8gx/hk1A6UG9g3P65+wwUtXLabbKr6q4XrqhauJ88/x4vuY6+2q5L2A2YpnH6b+YfVEF9Mo0vqfTf7t8I9Tsnyx2yJb/tqtjWwydgNKDeayqrk2rtWxi9Zd3W26Y/3GxaODFyo1TsyP7y6Ke1vdQ3dFyXbcq58nysPxZ/Xeni/Vb2JSA0r3l+UtnjdXM+XbzNH6Xbmgcs18/ej/38ffvjqd7NE/X9mOu7m0tB67OQ32/MsZZvcP0T3+19c7mBJTunTUO+TQOus/+dvrlpRuW64zNkzrnnZ28eXDcOCR0snbaZ1tAm6brpLMJOY+JTQkonZs8XYlXvWm92suyZ5duWAnoYiflbE2ycUh9s4A2f2AW0PqQVGNK8FUCSufW4lXHcLc10On65NVb337/n/c2DmjLofY3zxSUbQgonTttBGp+GGmjfaCNo0rzPZzTvztdnA0/2726yT7Q9kPtH398VjiPiQ0JKF1bnGJUOy3m2+DzoE3zeOmGRkDXj8I38nhWrB2Fn66+Xgro8vj/TGO/QIfv0WfgBJSurV6KvnHa5435DVW+Lt3QCOj6eaDLPJ7fK+Y/vXgD6OX3PFV3f7o4MXS2Rrw8IUpA2ZSA0rXVUzerVcEbs/2it39ZvjHo0g3N/ZrNdyLNDqBXm/DTw0Dzs+6rdyJNXkyDejmg1W7T6q1JFx9fFPOT8ZfvZursSs8Mm4DSsca2eW260V3eevV47ajS6g3NgK6/F/7yeVGNf1HV+nJAV37m7nT81UHhqwSUjp2urd9VqXtS76qcJe3a/FofqzesHFlfvxrTi3k8H833bS7+RR3HloBenK2dtbQ8u+ra4n7giwSUbl06ejN9j3t9rKe6BN3Vx9NbL92wemrS/Hqg8+/rb68+alwir74e6PTioe0BLbf4167/+fbZcbFykVH4MgElCytvyWy9AfIjoGRBQBkiASULAsoQCShZEFCGSEDJgoAyRAJKFgSUIRJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgCABBQgSUIAgAQUIElCAIAEFCBJQgKD/D9rSXm+pT1t3AAAAAElFTkSuQmCC" width="672" /></p>
+<p>If we really want to know whether our predictions are good or not, one way to do this is to compare them with the naive approaches. Those predictions with the naive approach can be seen as a baseline. Therefore, we see that the regression model we used in Part D (lasso regression) is the best and is very effective. The main reason for lasso regression having the best performance is because it uses penalized approach. fused approach has also performed well. Probably due to the chosen lambda value, it performed slightly bad compared to Part D. If the lambda value was chosen differently, we might observe an improvement and maybe with this way its performance would be better than Part D.</p>
+<p>All in all, it is obvious that there are other regression models or approaches which are better than the naive approach. Thus, for predictions, regression algorithms, especially with penalties, must be used to make really good predictions. Also, parameters such as lambda must be chosen accordingly to get the highest performance.</p>
 <p>Also, we can observe that the naive approach Lag_48 has the worst prediction performance. This was expected.</p>
 </div>
 

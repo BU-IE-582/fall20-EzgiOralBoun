@@ -12,6 +12,7 @@ library(readr)
 require(utils)
 library(lubridate)
 library(glmnet)
+library(CVXR)
 ```
 
 ## Reading the Data:
@@ -477,58 +478,72 @@ Lasso regression calculations:
 
 ```{r}
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_0h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_0h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_0h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_0h<-predict(praModel_0h, newx= as.matrix(wideTestData[,-c(1)])) 
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_1h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_1h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_1h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_1h<-predict(praModel_1h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_2h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_2h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_2h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_2h<-predict(praModel_2h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_3h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_3h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_3h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_3h<-predict(praModel_3h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_4h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_4h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_4h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_4h<-predict(praModel_4h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_5h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_5h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_5h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_5h<-predict(praModel_5h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_6h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_6h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_6h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_6h<-predict(praModel_6h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_7h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_7h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_7h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_7h<-predict(praModel_7h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_8h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_8h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_8h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_8h<-predict(praModel_8h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_9h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_9h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_9h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_9h<-predict(praModel_9h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_10h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_10h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_10h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_10h<-predict(praModel_10h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_11h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_11h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_11h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_11h<-predict(praModel_11h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_12h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_12h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_12h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_12h<-predict(praModel_12h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_13h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_13h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_13h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_13h<-predict(praModel_13h, newx= as.matrix(wideTestData[,-c(1)]))
 
@@ -537,48 +552,61 @@ praModel_14h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_14h[,3],alpha=1,f
 predict_14h<-predict(praModel_14h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_15h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_15h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_15h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_15h<-predict(praModel_15h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_16h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_16h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_16h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_16h<-predict(praModel_16h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_17h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_17h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_17h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_17h<-predict(praModel_17h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_18h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_18h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_18h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_18h<-predict(praModel_18h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_19h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_19h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_19h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_19h<-predict(praModel_19h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_20h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_20h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_20h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_20h<-predict(praModel_20h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_21h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_21h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_21h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_21h<-predict(praModel_21h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_22h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_22h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_22h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_22h<-predict(praModel_22h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdaCalc<-cv.glmnet(as.matrix(wideDataTrain[,-c(1,50)]), partD_23h[,3], type.measure='mse', nfolds=10, family='gaussian', alpha=1)$lambda.min
+summary(lambdaCalc)
 praModel_23h<-glmnet(as.matrix(wideDataTrain[,-c(1,50)]),partD_23h[,3],alpha=1,family='gaussian',lambda = lambdaCalc)
 predict_23h<-predict(praModel_23h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdas<-rbind(praModel_0h$lambda,praModel_1h$lambda,praModel_2h$lambda,praModel_3h$lambda,praModel_4h$lambda,praModel_5h$lambda,praModel_6h$lambda,praModel_7h$lambda,praModel_8h$lambda,praModel_9h$lambda,praModel_10h$lambda,praModel_11h$lambda,praModel_12h$lambda,praModel_13h$lambda,praModel_14h$lambda,praModel_15h$lambda,praModel_16h$lambda,praModel_17h$lambda,praModel_18h$lambda,praModel_19h$lambda,praModel_20h$lambda,praModel_21h$lambda,praModel_22h$lambda,praModel_23h$lambda)
 ```
 
+Above, we see from "summary(lambdaCalc)" that lambda values (mean, 1st Q. etc.) are almost identical for each case.
+
 Lambda values for each hour (starting from 00.00 to 23.00) are as follows:
 
 ```{r}
 lambdas
+
+summary(praModel_0h)
 
 mapePartD_0h<-mape(predict_0h,tempPartD_0h[,3])
 mapePartD_1h<-mape(predict_1h,tempPartD_1h[,3])
@@ -615,18 +643,49 @@ We do not observe any relation between lambdas and Mape values.
 
 ## PART E
 
+Using fused penalties:
+
+```{r}
+yTestPartE <-cbind(tempPartD_0h[,3],tempPartD_1h[,3],tempPartD_2h[,3],tempPartD_3h[,3],tempPartD_4h[,3],tempPartD_5h[,3],tempPartD_6h[,3],tempPartD_7h[,3],tempPartD_8h[,3],tempPartD_9h[,3],tempPartD_10h[,3],tempPartD_11h[,3],tempPartD_12h[,3],tempPartD_13h[,3],tempPartD_14h[,3],tempPartD_15h[,3],tempPartD_16h[,3],tempPartD_17h[,3],tempPartD_18h[,3],tempPartD_19h[,3],tempPartD_20h[,3],tempPartD_21h[,3],tempPartD_22h[,3],tempPartD_23h[,3])
+wideFirstStep_PartE<-cbind(partD_0h[,c(1,3,4,5)],partD_1h[,c(3,4,5)],partD_2h[,c(3,4,5)],partD_3h[,c(3,4,5)],partD_4h[,c(3,4,5)],partD_5h[,c(3,4,5)],partD_6h[,c(3,4,5)],partD_7h[,c(3,4,5)],partD_8h[,c(3,4,5)],partD_9h[,c(3,4,5)],partD_10h[,c(3,4,5)],partD_11h[,c(3,4,5)],partD_12h[,c(3,4,5)],partD_13h[,c(3,4,5)],partD_14h[,c(3,4,5)],partD_15h[,c(3,4,5)],partD_16h[,c(3,4,5)],partD_17h[,c(3,4,5)],partD_18h[,c(3,4,5)],partD_19h[,c(3,4,5)],partD_20h[,c(3,4,5)],partD_21h[,c(3,4,5)],partD_22h[,c(3,4,5)],partD_23h[,c(3,4,5)] )
+beta<-Variable(48)
+mapePartE<-vector()
+for (i in 1:24)
+{
+indx<-(i*3)-1
+yPartE<-as.matrix(wideFirstStep_PartE[,c(indx)])
+xPartE<-as.matrix(wideFirstStep[,c(-1)])
+  
+
+objectiveFunction<-(sum_squares(yPartE-xPartE %*% beta) + max(lambdas)*sum(beta^2)) + max(lambdas)*p_norm(diff(beta, differences=1),1)
+resultsParams<-solve(Problem(Minimize(objectiveFunction)))
+
+foundBeta<-resultsParams$getValue(beta) 
+
+xTestPartE<-as.matrix(wideTestData[,c(-1)])
+TestY<-as.matrix(yTestPartE[,i])
+
+fusedPred<-xTestPartE %*% foundBeta
+mapePartE[i]<-mape(fusedPred,TestY)
+}
+as.matrix(mapePartE)
+
+```
+
+Above, we can see the Mape results for each hour. First of all, when we compare these results with Part D, we can say that the Mape values are slightly bad for every hour. This may mean that penalized regression model is better than the fused penalty model. However, lambda values create an important difference in fused penalty approach. Therefore, selected lambda values for Part E might be wrong. For some lambda values, fused penalty approach might be slightly better then penalized regression model used in Part D.  We observe a similar difference between working hours and night hours like in Part C and Part D. It is possible to say that this regression model is almost excellent because the Mape values are very low.
 
 ## PART F
 
 The figure below shows the comparison of different approaches used in this assignment. It is a nice visualization to decide which one is the best or the worst.
 
 ```{r}
-boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD , names = c("Lag_48","Lag_168","Part B","Part C","Part D"), xlab = "Approaches" , ylab = "Mape Values (%)")
+boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD ,mapePartE, names = c("Lag_48","Lag_168","Part B","Part C","Part D", "Part E"), xlab = "Approaches" , ylab = "Mape Values (%)")
+
 ```
 
-If we really want to know whether our predictions are good or not, we have to compare them with the naive approaches. Those predictions with the naive approach can be seen as a baseline. Therefore, we see that the regression model we used in Part D (lasso regression) is the best and is very effective. The main reason for lasso regression having the best performance is because it uses penalized approach.
+If we really want to know whether our predictions are good or not, one way to do this is to compare them with the naive approaches. Those predictions with the naive approach can be seen as a baseline. Therefore, we see that the regression model we used in Part D (lasso regression) is the best and is very effective. The main reason for lasso regression having the best performance is because it uses penalized approach. fused approach has also performed well. Probably due to the chosen lambda value, it performed slightly bad compared to Part D. If the lambda value was chosen differently, we might observe an improvement and maybe with this way its performance would be better than Part D.
 
-All in all, it is obvious that there are other regression models or approaches which are better than the naive approach. Thus, for predictions, regression algorithms, especially with penalties, must be used to make really good predictions.
+All in all, it is obvious that there are other regression models or approaches which are better than the naive approach. Thus, for predictions, regression algorithms, especially with penalties, must be used to make really good predictions. Also, parameters such as lambda must be chosen accordingly to get the highest performance.
 
 
 Also, we can observe that the naive approach Lag_48 has the worst prediction performance. This was expected.

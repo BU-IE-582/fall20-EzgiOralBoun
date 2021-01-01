@@ -4,6 +4,7 @@ library(readr)
 require(utils)
 library(lubridate)
 library(glmnet)
+library(CVXR)
 
 hw3ConsData<-read_csv("GercekZamanliTuketim-01012016-01122020.csv")
 
@@ -534,6 +535,7 @@ predict_23h<-predict(praModel_23h, newx= as.matrix(wideTestData[,-c(1)]))
 
 lambdas<-rbind(praModel_0h$lambda,praModel_1h$lambda,praModel_2h$lambda,praModel_3h$lambda,praModel_4h$lambda,praModel_5h$lambda,praModel_6h$lambda,praModel_7h$lambda,praModel_8h$lambda,praModel_9h$lambda,praModel_10h$lambda,praModel_11h$lambda,praModel_12h$lambda,praModel_13h$lambda,praModel_14h$lambda,praModel_15h$lambda,praModel_16h$lambda,praModel_17h$lambda,praModel_18h$lambda,praModel_19h$lambda,praModel_20h$lambda,praModel_21h$lambda,praModel_22h$lambda,praModel_23h$lambda)
 
+
 summary(praModel_0h)
 
 mapePartD_0h<-mape(predict_0h,tempPartD_0h[,3])
@@ -565,9 +567,32 @@ mapePartD<-rbind(mapePartD_0h,mapePartD_1h,mapePartD_2h,mapePartD_3h,mapePartD_4
 
 ## PART E
 
+yTestPartE <-cbind(tempPartD_0h[,3],tempPartD_1h[,3],tempPartD_2h[,3],tempPartD_3h[,3],tempPartD_4h[,3],tempPartD_5h[,3],tempPartD_6h[,3],tempPartD_7h[,3],tempPartD_8h[,3],tempPartD_9h[,3],tempPartD_10h[,3],tempPartD_11h[,3],tempPartD_12h[,3],tempPartD_13h[,3],tempPartD_14h[,3],tempPartD_15h[,3],tempPartD_16h[,3],tempPartD_17h[,3],tempPartD_18h[,3],tempPartD_19h[,3],tempPartD_20h[,3],tempPartD_21h[,3],tempPartD_22h[,3],tempPartD_23h[,3])
+wideFirstStep_PartE<-cbind(partD_0h[,c(1,3,4,5)],partD_1h[,c(3,4,5)],partD_2h[,c(3,4,5)],partD_3h[,c(3,4,5)],partD_4h[,c(3,4,5)],partD_5h[,c(3,4,5)],partD_6h[,c(3,4,5)],partD_7h[,c(3,4,5)],partD_8h[,c(3,4,5)],partD_9h[,c(3,4,5)],partD_10h[,c(3,4,5)],partD_11h[,c(3,4,5)],partD_12h[,c(3,4,5)],partD_13h[,c(3,4,5)],partD_14h[,c(3,4,5)],partD_15h[,c(3,4,5)],partD_16h[,c(3,4,5)],partD_17h[,c(3,4,5)],partD_18h[,c(3,4,5)],partD_19h[,c(3,4,5)],partD_20h[,c(3,4,5)],partD_21h[,c(3,4,5)],partD_22h[,c(3,4,5)],partD_23h[,c(3,4,5)] )
+beta<-Variable(48)
+mapePartE<-vector()
+for (i in 1:24)
+{
+indx<-(i*3)-1
+yPartE<-as.matrix(wideFirstStep_PartE[,c(indx)])
+xPartE<-as.matrix(wideFirstStep[,c(-1)])
+  
 
+objectiveFunction<-(sum_squares(yPartE-xPartE %*% beta) + max(lambdas)*sum(beta^2)) + max(lambdas)*p_norm(diff(beta, differences=1),1)
+resultsParams<-solve(Problem(Minimize(objectiveFunction)))
+
+foundBeta<-resultsParams$getValue(beta) 
+
+xTestPartE<-as.matrix(wideTestData[,c(-1)])
+TestY<-as.matrix(yTestPartE[,i])
+
+fusedPred<-xTestPartE %*% foundBeta
+mapePartE[i]<-mape(fusedPred,TestY)
+}
+as.matrix(mapePartE)
 
 
 ## PART F
 
-boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD , names = c("Lag_48","Lag_168","Part B","Part C","Part D"), xlab = "Approaches" , ylab = "Mape Values (%)")
+boxplot(mape_lag48,mape_lag168,mapePartB,mapePartC, mapePartD ,mapePartE, names = c("Lag_48","Lag_168","Part B","Part C","Part D", "Part E"), xlab = "Approaches" , ylab = "Mape Values (%)")
+
