@@ -2295,7 +2295,7 @@ class.pred_rf</code></pre>
 <pre><code>## [1] 0.9044586</code></pre>
 </div>
 <div id="parameters-and-comments-on-random-forest-for-dataset-2-1" class="section level2">
-<h2>Parameters and Comments on Random Forest for Dataset #2</h2>
+<h2>Parameters and Comments on Random Forest for Dataset #4</h2>
 <p>Above, the optimum value of the m parameter is found as 3. J=500 and the minimal number of observations per tree leaf=5.</p>
 <p>After finding the optimal m value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal m to training data, I have obtained 88% total accuracy (total_accuracy_validation_rf). With the prediction on test data, I have obtained 90% total accuracy (total_accuracy_rf).</p>
 <p>88% and 90% accuracy are very good. This shows that using Random forest for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has increased in the test.</p>

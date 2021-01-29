@@ -1929,7 +1929,7 @@ total_accuracy_validation_rf
 total_accuracy_rf
 ```
 
-## Parameters and Comments on Random Forest for Dataset #2
+## Parameters and Comments on Random Forest for Dataset #4
 
 Above, the optimum value of the m parameter is found as 3. J=500 and the minimal number of observations per tree leaf=5.
 
