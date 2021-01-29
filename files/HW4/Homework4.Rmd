@@ -63,6 +63,7 @@ SouthGermanCredit_altered <- read_delim("C:/Users/Ezgi/Desktop/IE 582/HW4/SouthG
                                         ";", escape_double = FALSE, trim_ws = TRUE)
 SouthGermanCredit_altered[sapply(SouthGermanCredit_altered, is.character)]<- lapply(SouthGermanCredit_altered[sapply(SouthGermanCredit_altered, is.character)],as.factor)
 dataset1<-SouthGermanCredit_altered
+head(dataset1)
 ```
 
 Arranging train and test data:
@@ -211,7 +212,7 @@ Above, the best "minimal number of observations per tree leaf (minbucket)" and "
 
 After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 69% total accuracy (total_accuracy_validation_dt). With the prediction on test_data, I have obtained 57% total accuracy (total_accuracy_dt). 
 
-69% and 57% accuracy is not good enough. This may show that using a decision tree for this dataset might not be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is a great difference which means there may be overfitting or underfitting. We can say that our accuracy has decreased in the test.
+69% and 57% accuracy is not so good. This may show that using a decision tree for this dataset might not be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is a great difference which means there may be overfitting or underfitting. We can say that our accuracy has decreased in the test.
 
 We did not have a good accuracy result. This might happened because we have low train samples (around 480), if it was around 1000 samples we would have better performances. Also, our way of overcoming the class imbalance problem might night be right for this dataset. Moreover, we select the training data randomly from all the data, we might have included so much noisy data and this may lead to a wrong model.
 
@@ -332,7 +333,7 @@ Above, the optimum value of the lambda parameter is found as 0.07. The l1 penalt
 
 After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal lambda to training data, I have obtained 66% total accuracy (total_accuracy_validation_pra). With the prediction on test data, I have obtained 62% total accuracy (total_accuracy_pra). 
 
-66% and 62% accuracy is not good enough. This may show that using Penalized Regression Approaches for this dataset might not be suitable or the lambda parameter should be chosen differently. Furthermore, when we look at the accuracy of the train and the test data, we see that there is not any huge difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+66% and 62% accuracy is not very good. This may show that using Penalized Regression Approaches for this dataset might not be suitable or the lambda parameter should be chosen differently. Furthermore, when we look at the accuracy of the train and the test data, we see that there is not any huge difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
 
 We did not have very good accuracy results. This might happened because we have low train samples (around 480), if it was around 1000 samples we would have better performances. Also, our way of overcoming the class imbalance problem might night be right for this dataset. Moreover, we select the training data randomly from all the data, we might have included so much noisy data and this may lead to a wrong model.
 
@@ -444,11 +445,11 @@ Above, the optimum value of the m parameter is found as 15. J=500 and the minima
 
 After finding the optimal m value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal m to training data, I have obtained 74% total accuracy (total_accuracy_validation_rf). With the prediction on test data, I have obtained 75% total accuracy (total_accuracy_rf). 
 
-85% and 75% accuracy are good enough. This may show that using Random forest for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+85% and 75% accuracy are good. This may show that using Random forest for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
 
 We have low train samples (around 480), if it was around 1000 samples we would have better performances.
 
-Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is good enough.
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is enough.
 
 ## Applying SGB Method
 
@@ -567,15 +568,15 @@ total_accuracy_sgb
 
 ## Parameters and Comments on Stochastic Gradient Boosting for Dataset #1
 
-Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 100. 
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 105. 
 
 After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 78% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 74% total accuracy (total_accuracy_sgb). 
 
-78% and 74% accuracy are good enough. This may show that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+78% and 74% accuracy are okay. This may show that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
 
 We have low train samples (around 480), if it was around 1000 samples we would have better performances.
 
-Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is good enough.
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is enough.
 
 ## General Comments on the Results for Dataset #1
 
@@ -2079,7 +2080,7 @@ From all of our different datasets and methods, we can say that Random Forest pe
 
 NOTE:
 
-.csv and .txt files can be found in [here](https://github.com/BU-IE-582/fall20-EzgiOralBoun/tree/master/files/HW4).
+.csv and .txt files can be found in [here](https://github.com/BU-IE-582/fall20-EzgiOralBoun/tree/master/files/HW4/Datasets).
 
 - You can access the dataset #1 for further information from this [link](https://archive.ics.uci.edu/ml/datasets/South+German+Credit+%28UPDATE%29#).
 
