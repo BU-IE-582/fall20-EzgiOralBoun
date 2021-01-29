@@ -18,5 +18,10 @@ Welcome to my Progress Journal!
 
 [Here](files/HW3/Homework3.html) you can find my Homework 3. R code for this homework is in [here](files/HW3/Homework3.R).
 
+## Homework 4 (Jan 29, 2021)
+
+[Here](files/HW4/Homework4.html) you can find my Homework 4. R code for this homework is in [here](files/HW4/Homework4.Rmd).
+
+
 
 

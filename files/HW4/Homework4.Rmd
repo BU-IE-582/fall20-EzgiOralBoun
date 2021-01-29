@@ -1,0 +1,2090 @@
+---
+title: "Homework4"
+author: "Ezgi ORAL"
+date: "27 01 2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r libraries,echo=FALSE,results="hide"}
+library(readr)
+library(purrr)
+library(plyr)
+library(corrplot)
+library(glmnet)
+#METRICs FOR ML
+library(ModelMetrics)
+library(Metrics)
+#Classification And Regression Training
+library(caret)
+#RANDOM FOREST
+library(randomForest)
+library(e1071)
+#Boosted Regression
+library(gbm)
+library(xgboost)
+#Decision Tree
+library(rpart)
+library(rpart.plot)
+library(rattle)
+#Classification and cluster
+library(class)
+library(cluster)
+library(OneR)
+library(writexl)
+```
+
+# Dataset #1 - South German Credit
+
+## About the dataset: South German Credit
+
+This dataset is chosen because:
+
+- It has 20 features
+
+- It has Numerical + Categorical features
+
+- It has labeled features
+
+- It has 1000 samples (which is enough to separate it into train + test data)
+
+- It has a class imbalance problem
+
+- It has a brief description of the task and features
+
+
+Reading the data:
+```{r readData1SoutGermanCredit, cache =TRUE}
+SouthGermanCredit_altered <- read_delim("C:/Users/Ezgi/Desktop/IE 582/HW4/SouthGermanCredit/SouthGermanCredit_altered.csv", 
+                                        ";", escape_double = FALSE, trim_ws = TRUE)
+SouthGermanCredit_altered[sapply(SouthGermanCredit_altered, is.character)]<- lapply(SouthGermanCredit_altered[sapply(SouthGermanCredit_altered, is.character)],as.factor)
+dataset1<-SouthGermanCredit_altered
+```
+
+Arranging train and test data:
+
+```{r}
+classImbalanceRaito <- table(dataset1[,ncol(dataset1)])
+classImbalanceRaito
+```
+
+As seen above, there is a class imbalance in this dataset. First I tried to implement this dataset without overcoming the class imbalance problem, I had very low accuracy in every method. Therefore I made some arrangements so that we can eliminate this problem. I preferred using undersampling. I did not want to use oversampling or synthetic data generation because this dataset might be noisy and this would affect the performance of the classification methods.
+
+```{r arrangeData1SouthGermanCredit, cache =TRUE}
+# Overcoming class imbalance
+
+data_0s <- dataset1[dataset1$credit_risk == 0,]
+data_1s <- dataset1[dataset1$credit_risk == 1,]
+
+data_0s <-data_0s[sample(1:nrow(data_0s),300, replace = TRUE),]
+data_1s <-data_1s[sample(1:nrow(data_1s),300, replace = TRUE),]
+
+data_in <- rbind(data_0s,data_1s)
+
+
+set.seed(123) # Random olan seyleri fixliyor. (burada yazan sayinin onemi yok)
+
+Index      <- sample(1:nrow(data_in), 0.7*nrow(data_in)) 
+data_train <- data_in[Index, ]  # model data
+data_test  <- data_in[-Index, ]   # model test data 
+
+
+
+
+folds     <- cut(seq(1,nrow(data_train)),breaks=10,labels=FALSE)
+Class_data  <- cbind(folds,data_train)
+dat<-Class_data 
+```
+
+## Applying Decision Tree Method
+
+```{r DTData1SouthGermanCredit, cache =TRUE}
+t=0
+c=0
+
+result_dt <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        cp = numeric(), minbucket=numeric(),f = numeric(),c = numeric())
+
+average_dt = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        cp = numeric(),minbucket=numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+set.seed(1218)
+
+# minbucket=i, cp=j 
+
+for(j in seq(from=0.01, to=0.05, by=0.01)){
+  for(i in seq(from=5, to=20, by=2)){
+    c=c+1
+    for(f in 1:10){    
+      
+      index <- which(dat[,1] == f )
+      train <- dat[-index, ]
+      train <- train[,-1]
+      test  <- dat[index, ]
+      test  <- test[,-1]
+      
+      model  <- rpart(formula = (credit_risk) ~., method = "class", data = train, control = rpart.control(cp=j,minbucket = i))
+      pred   <-  predict(model,test ,type = "class")
+      test.y <- as.factor(test[,ncol(test)]) # son kolon y 
+      
+      class.pred     <- table(pred,test.y)
+      total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+      firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+      secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+      
+      
+      t=t+1
+      
+      result_dt[t,1] = total_accuracy
+      result_dt[t,2] = firstaccuracy
+      result_dt[t,3] = secondaccuracy
+      result_dt[t,4] = j
+      result_dt[t,5] = i
+      result_dt[t,6] = f
+      result_dt[t,7] = c 
+    
+   
+    }  
+    
+    for( k in 1:c){
+      
+      average_dt[k,1]  = mean(result_dt[which(result_dt$c==k), ]$total_accuracy)
+      average_dt[k,2]  = mean(result_dt[which(result_dt$c==k), ]$firstaccuracy)
+      average_dt[k,3]  = mean(result_dt[which(result_dt$c==k), ]$secondaccuracy)
+      average_dt[k,4]  = mean(result_dt[which(result_dt$c==k), ]$cp)
+      average_dt[k,5]  = mean(result_dt[which(result_dt$c==k), ]$minbucket)
+      average_dt[k,6]  = mean(result_dt[which(result_dt$c==k), ]$c)
+    }
+  }
+}
+```
+
+```{r DTdata1TEST, cache =TRUE }
+pointer<-which.max(average_dt$total_accuracy)
+total_accuracy_validation_dt<-max(average_dt$total_accuracy)
+cp<-average_dt[pointer,"cp"]
+minbucket<-average_dt[pointer,"minbucket"]
+
+cp
+minbucket
+
+head(average_dt)
+## Testing
+
+model_dt  <- rpart(formula = (credit_risk) ~., method = "class", data = data_train, control = rpart.control(cp=cp,minbucket = minbucket))
+pred_dt   <- as.factor(predict(model_dt,data_test ,type = "class"))
+test.y <- (data_test[,ncol(data_test)]) # Son kolon y 
+
+class.pred_dt     <- cbind(pred_dt,test.y)
+
+count <- 0
+for (i in 1:nrow(class.pred_dt)){
+  if (class.pred_dt[i,1]!=class.pred_dt[i,2]){
+    count=count +1
+    count
+  }
+}
+error_dt=count/nrow(class.pred_dt)
+
+total_accuracy_dt<- 1 - error_dt
+
+rpart.plot(model_dt,cex = 0.75)
+
+total_accuracy_validation_dt
+total_accuracy_dt
+
+```
+
+## Parameters and Comments on Decision Tree for Dataset #1
+
+Above, the best "minimal number of observations per tree leaf (minbucket)" and "complexity parameter (cp)" parameters are found. The minimal number of observations per tree leaf is 5 and the complexity parameter is 0.01. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 69% total accuracy (total_accuracy_validation_dt). With the prediction on test_data, I have obtained 57% total accuracy (total_accuracy_dt). 
+
+69% and 57% accuracy is not good enough. This may show that using a decision tree for this dataset might not be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is a great difference which means there may be overfitting or underfitting. We can say that our accuracy has decreased in the test.
+
+We did not have a good accuracy result. This might happened because we have low train samples (around 480), if it was around 1000 samples we would have better performances. Also, our way of overcoming the class imbalance problem might night be right for this dataset. Moreover, we select the training data randomly from all the data, we might have included so much noisy data and this may lead to a wrong model.
+
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_dt)% and the test error rate can be considered as 100% - (total_accuracy_dt)%. Therefore, it is possible to say that the cross-validation error rate of this approach is not consistent with the test error rate.
+
+## Applying PRA Method
+
+```{r PRAData1SouthGermanCredit, cache =TRUE}
+t=0
+c=0
+
+result_pra <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         l = numeric(),f = numeric(),c = numeric())
+
+average_pra = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         l = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+
+for(l in seq(from=0.01, to=0.1, by=0.02))
+{
+  c=c+1
+  for(f in 1:10){    
+    
+    index <- which(dat[,1] == f )
+    train <- dat[-index, ]
+    train <- train[,-1]
+    test  <- dat[index, ]
+    test  <- test[,-1]
+    
+    model<-glmnet(data.matrix(train[,-ncol(train)]),as.matrix(train[,ncol(train)]),alpha=1,lambda = l,family = "binomial")
+    prediction <-predict(model, newx= data.matrix(test[,-ncol(test)]), type = "response") 
+    pred <- as.factor(ifelse(prediction>0.5, 1,0))
+    test.y <- test[,ncol(test)] # Son kolon y 
+    
+    class.pred     <- cbind(pred,test.y)
+    count <- 0
+    for (i in 1:nrow(class.pred)){
+      if (class.pred[i,1]!=class.pred[i,2]){
+      count=count +1
+      count
+      }
+      }
+    error_=count/nrow(class.pred)
+    
+    class.pred     <- table(pred,test.y)
+    total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+    firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+    secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+    
+    t=t+1
+    
+    result_pra[t,1] = total_accuracy
+    result_pra[t,2] = firstaccuracy
+    result_pra[t,3] = secondaccuracy
+    result_pra[t,4] = l
+    result_pra[t,5] = f
+    result_pra[t,6] = c 
+
+  }  
+  
+  for( k in 1:c){
+    
+    average_pra[k,1]  = mean(result_pra[which(result_pra$c==k), ]$total_accuracy)
+    average_pra[k,2]  = mean(result_pra[which(result_pra$c==k), ]$firstaccuracy)
+    average_pra[k,3]  = mean(result_pra[which(result_pra$c==k), ]$secondaccuracy)
+    average_pra[k,4]  = mean(result_pra[which(result_pra$c==k), ]$l)
+    average_pra[k,5]  = mean(result_pra[which(result_pra$c==k), ]$c)
+  }
+  
+}
+```
+
+```{r PRAdata1TEST, cache = TRUE}
+pointer<-which.max(average_pra$total_accuracy)
+total_accuracy_validation_pra<-max(average_pra$total_accuracy)
+lambda<-average_pra[pointer,"l"]
+
+lambda
+
+head(average_pra)
+## Testing
+ 
+model_pra <-glmnet(data.matrix(data_train[,-ncol(data_train)]),as.matrix(data_train[,ncol(data_train)]),alpha=1,lambda = lambda, family = 'binomial')
+prediction_pra <-predict(model_pra, newx= data.matrix(data_test[,-ncol(data_test)]), type = "response") 
+
+pred_pra <- as.factor(ifelse(prediction_pra>0.5, 1,0))
+test.y <- (data_test[,ncol(test)]) # Son kolon y 
+
+class.pred_pra     <- cbind(pred_pra,test.y)
+#total_accuracy_pra <- sum(diag(class.pred_pra))/sum(class.pred_pra)
+
+count <- 0
+for (i in 1:nrow(class.pred_pra)){
+  if (class.pred_pra[i,1]!=class.pred_pra[i,2]){
+    count=count +1
+    count
+  }
+}
+error_=count/nrow(class.pred_pra)
+
+total_accuracy_pra<- 1 - error_
+
+total_accuracy_validation_pra
+total_accuracy_pra
+```
+
+## Parameters and Comments on Penalized Regression Approach for Dataset #1
+
+Above, the optimum value of the lambda parameter is found as 0.07. The l1 penalty is used.
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal lambda to training data, I have obtained 66% total accuracy (total_accuracy_validation_pra). With the prediction on test data, I have obtained 62% total accuracy (total_accuracy_pra). 
+
+66% and 62% accuracy is not good enough. This may show that using Penalized Regression Approaches for this dataset might not be suitable or the lambda parameter should be chosen differently. Furthermore, when we look at the accuracy of the train and the test data, we see that there is not any huge difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+
+We did not have very good accuracy results. This might happened because we have low train samples (around 480), if it was around 1000 samples we would have better performances. Also, our way of overcoming the class imbalance problem might night be right for this dataset. Moreover, we select the training data randomly from all the data, we might have included so much noisy data and this may lead to a wrong model.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_pra)% and the test error rate can be considered as 100% - (total_accuracy_pra)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate.
+
+## Applying Random Forest Method
+
+```{r RFData1SouthGermanCredit, cache =TRUE}
+t=0
+c=0
+
+result_rf<- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                       
+                       m = numeric(),f = numeric(), c = numeric())
+
+average_rf= data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                       
+                       m = numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+#start<-Sys.time()
+set.seed(1218)
+
+# m=j 
+
+for(j in seq(from=3, to=20, by=4)){
+  
+  c=c+1
+  for(f in 1:10){    
+    
+    index <- which(dat[,1] == f )
+    train <- dat[-index, ]
+    train <- train[,-1]
+    test  <- dat[index, ]
+    test  <- test[,-1]
+    
+    model  <- randomForest(formula = as.factor(credit_risk) ~., data = train, ntree = 500, nodesize = 5, mtry=j ,importance = T, na.action = na.omit)
+    prediction   <- predict(model,test ,type = "class")
+
+    test.y <- (test[,ncol(test)]) # Ilk kolon y 
+    
+    class.pred     <- table(prediction,test.y)
+    
+    total_accuracy=sum(diag(class.pred))/sum(class.pred)
+    firstaccuracy=class.pred[1,1]/sum(class.pred[1,])
+    secondaccuracy=class.pred[2,2]/sum(class.pred[2,]) 
+    
+    
+    t=t+1
+    
+    result_rf[t,1] = total_accuracy
+    result_rf[t,2] = firstaccuracy
+    result_rf[t,3] = secondaccuracy
+    result_rf[t,4] = j
+    result_rf[t,5] = f
+    result_rf[t,6] = c
+    
+
+  }  
+  
+  for( k in 1:c){
+    
+    average_rf[k,1]  = mean(result_rf[which(result_rf$c==k), ]$total_accuracy)
+    average_rf[k,2]  = mean(result_rf[which(result_rf$c==k), ]$firstaccuracy)
+    average_rf[k,3]  = mean(result_rf[which(result_rf$c==k), ]$secondaccuracy)
+    average_rf[k,4]  = mean(result_rf[which(result_rf$c==k), ]$m)
+    average_rf[k,5]  = mean(result_rf[which(result_rf$c==k), ]$c)
+  }
+}
+```
+
+```{r RFdata1TEST, cache = TRUE}
+
+pointer<-which.max(average_rf$total_accuracy)
+total_accuracy_validation_rf<-max(average_rf$total_accuracy)
+m<-average_rf[pointer,"m"]
+
+m
+
+head(average_rf)
+## Testing
+
+model_rf  <- randomForest(formula = as.factor(credit_risk) ~., data = data_train, ntree = 500, nodesize = 5, mtry=m ,importance = T, na.action = na.omit)
+pred_rf   <- as.factor(predict(model_rf,data_test ,type = "class"))
+test.y <- (data_test[,ncol(data_test)]) # Son kolon y 
+
+class.pred_rf     <- cbind(pred_rf,test.y)
+
+count <- 0
+for (i in 1:nrow(class.pred_rf)){
+  if (class.pred_rf[i,1]!=class.pred_rf[i,2]){
+    count=count +1
+    count
+  }
+}
+error_=count/nrow(class.pred_rf)
+
+total_accuracy_rf<- 1 - error_
+
+total_accuracy_validation_rf
+total_accuracy_rf
+```
+
+## Parameters and Comments on Random Forest for Dataset #1
+
+Above, the optimum value of the m parameter is found as 15. J=500 and the minimal number of observations per tree leaf=5.
+
+After finding the optimal m value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal m to training data, I have obtained 74% total accuracy (total_accuracy_validation_rf). With the prediction on test data, I have obtained 75% total accuracy (total_accuracy_rf). 
+
+85% and 75% accuracy are good enough. This may show that using Random forest for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+
+We have low train samples (around 480), if it was around 1000 samples we would have better performances.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is good enough.
+
+## Applying SGB Method
+
+```{r SGBData1SouthGermanCredit, cache =TRUE}
+c = 0
+t = 0
+result_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        j = numeric(), n = numeric(), i = numeric(), f = numeric(), c = numeric())
+average_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         j = numeric(), n = numeric(),i = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+
+set.seed(128)
+# ntree=j,interaction.depth=n, shrinkage=i =learning rate
+
+for(j in seq(from=50, to=250, by=50)){
+  for(n in seq(from=1, to=5, by=1)){
+    for(i in seq(from=0.01, to=0.2, by=0.04)){
+      c          = c + 1
+      for(f in 1:5){    
+        
+        index    = which(dat [,1] == f )
+        train = dat[-index, ]
+        train = train[ , -c(1)]
+        test  = dat[index, ]
+        test  = test[ , -c(1)]
+        
+        model          <- gbm(formula = credit_risk ~., data = train, n.trees = j, interaction.depth = n, shrinkage = i,distribution = "bernoulli")
+        prediction     <- predict(model, newdata=test, n.trees=j,type = "response")
+        pred <- ifelse(prediction >0.5, 1,0)
+        test.y       <- as.factor(test[ , ncol(test)])
+        
+        class.pred   <- table(pred, test.y)
+     
+        total_accuracy=sum(diag(class.pred))/sum(class.pred)
+        firstaccuracy=class.pred[1,1]/sum(class.pred[1,])
+        secondaccuracy=class.pred[2,2]/sum(class.pred[2,]) 
+        
+        
+        t = t+1
+        
+        result_gbm[t,1]  = total_accuracy
+        result_gbm[t,2]  = firstaccuracy
+        result_gbm[t,3]  = secondaccuracy
+        result_gbm[t,4]  = j
+        result_gbm[t,5] = n
+        result_gbm[t,6] = i
+        result_gbm[t,7] = f
+        result_gbm[t,8] = c
+        
+        #print(c("alive","j=",j,"n=",n,"i=",i,"f=",f))
+      }
+      for( k in 1:c){
+        
+        average_gbm[k,1]   = mean(result_gbm[which(result_gbm$c==k), ]$total_accuracy)
+        average_gbm[k,2]   = mean(result_gbm[which(result_gbm$c==k), ]$firstaccuracy)
+        average_gbm[k,3]   = mean(result_gbm[which(result_gbm$c==k), ]$secondaccuracy)
+        
+        average_gbm[k,4]   = mean(result_gbm[which(result_gbm$c==k), ]$j)
+        average_gbm[k,5]  = mean(result_gbm[which(result_gbm$c==k), ]$n)
+        average_gbm[k,6]  = mean(result_gbm[which(result_gbm$c==k), ]$i)
+        average_gbm[k,7]  = mean(result_gbm[which(result_gbm$c==k), ]$c)
+      }
+    } 
+  }
+}
+```
+
+```{r SGBdata1TEST, cache = TRUE}
+
+pointer<-which.max(average_gbm$total_accuracy)
+total_accuracy_validation_sgb<-max(average_gbm$total_accuracy)
+ntree<-average_gbm[pointer,"j"]
+depth<-average_gbm[pointer,"n"]
+learningRate<-average_gbm[pointer,"i"]
+
+ntree
+depth
+learningRate
+
+## Testing
+
+model_sgb          <- gbm(formula = credit_risk ~., data = data_train, n.trees = ntree, interaction.depth = depth, shrinkage = learningRate,distribution = "bernoulli")
+prediction_sgb     <- (predict(model_sgb, newdata=data_test, n.trees=ntree,type = "response"))
+p.pred_sgb         <- as.factor(ifelse(prediction_sgb >0.5, 1,0))
+test.y             <- (data_test[ , ncol(data_test)])
+
+class.pred_sgb   <- cbind(p.pred_sgb, test.y)
+
+#class.pred_sgb   <- table(p.pred_sgb, test.y)
+
+
+#total_accuracy_sgb=sum(diag(class.pred_sgb))/sum(class.pred_sgb)
+
+count <- 0
+for (i in 1:nrow(class.pred_sgb)){
+  if (class.pred_sgb[i,1]!=class.pred_sgb[i,2]){
+    count=count +1
+    count
+  }
+}
+error_=count/nrow(class.pred_sgb)
+
+total_accuracy_sgb<- 1 - error_
+
+total_accuracy_validation_sgb
+total_accuracy_sgb
+```
+
+## Parameters and Comments on Stochastic Gradient Boosting for Dataset #1
+
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 105. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 78% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 74% total accuracy (total_accuracy_sgb). 
+
+78% and 74% accuracy are good enough. This may show that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+
+We have low train samples (around 480), if it was around 1000 samples we would have better performances.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our cross-validation error is smaller than the test error. This means that we did not perform a very good model but it is good enough.
+
+## General Comments on the Results for Dataset #1
+
+We observe that the Random Forest method gave the best cross-validation performance and the best test performance. Decision tree method has the worst performance in both cross-validation and test performance above others. The performances of some algorithms were not so good. This might happened because we could not fix the class imbalance problem correctly or the data was too noisy.
+
+Important Note: During the evaluation of the accuracy, I used the total accuracy. One could also use "roc" or other metrics. I believe total accuracy is good enough to measure the performances.
+
+# Dataset #2 - Grammatical Facial Expression
+
+
+## About the dataset: Grammatical Facial Expression/A_Topics
+
+This dataset is chosen because:
+
+- It has 100 features
+
+- It has labeled features
+
+- It has a class imbalance
+
+- It has 1000 samples (which is enough to separate it into train + test data)
+
+- It has a brief description of the task and features
+
+Reading the dataset:
+
+```{r readData2Grammar, cache =TRUE}
+a_topics_datapoints <- read.csv("C:/Users/Ezgi/Desktop/IE 582/HW4/grammatical_facial_expression/grammatical_facial_expression/a_topics_datapoints.txt", sep="")
+a_topics_targets <- read.table("C:/Users/Ezgi/Desktop/IE 582/HW4/grammatical_facial_expression/grammatical_facial_expression/a_topics_targets.txt", quote="\"", comment.char="")
+
+dataGrammar <- cbind(a_topics_datapoints, a_topics_targets)
+```
+
+Arranging train and test data:
+
+```{r arrangeData2Grammar, cache =TRUE}
+
+classImbalanceRaito <- table(a_topics_targets[,ncol(a_topics_targets)])
+classImbalanceRaito
+
+dataset4<-dataGrammar
+
+set.seed(123) # Random olan seyleri fixliyor. (burada yazan sayinin onemi yok)
+
+Index      <- sample(1:nrow(dataset4), 0.7*nrow(dataset4)) 
+data_train <- dataset4[Index, ]  # model data
+data_test  <- dataset4[-Index, ]   # model test data   
+
+folds     <- cut(seq(1,nrow(data_train)),breaks=10,labels=FALSE)
+Class_data  <- cbind(folds,data_train)
+dat<-Class_data 
+```
+
+Above, we see that there is a class imbalance in this dataset. First, without applying any undersampling, oversampling, or creating synthetic data, etc., I wanted to see how this dataset will perform under 4 methods. If they perform well, there won't be a need for overcoming the class imbalance problem.
+
+## Applying Decision Tree Method:
+
+```{r DTdata2Grammar, cache =TRUE}
+t=0
+c=0
+
+result_dt <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        cp = numeric(), minbucket=numeric(),f = numeric(),c = numeric())
+
+average_dt = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        cp = numeric(),minbucket=numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+#start<-Sys.time()
+set.seed(1218)
+
+# minbucket=i, cp=j 
+
+for(j in seq(from=0.01, to=0.05, by=0.01)){
+  for(i in seq(from=5, to=20, by=2)){
+    c=c+1
+    for(f in 1:10){    
+      
+      index <- which(dat[,1] == f )
+      train <- dat[-index, ]
+      train <- train[,-1]
+      test  <- dat[index, ]
+      test  <- test[,-1]
+      
+      model  <- rpart(formula = (V1) ~., method = "class", data = train, control = rpart.control(cp=j,minbucket = i))
+      pred   <-  predict(model,test ,type = "class")
+      test.y <- as.factor(test[,ncol(test)]) # son kolon y 
+      
+      class.pred     <- table(pred,test.y)
+      total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+      firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+      secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+
+      t=t+1
+      
+      result_dt[t,1] = total_accuracy
+      result_dt[t,2] = firstaccuracy
+      result_dt[t,3] = secondaccuracy
+      result_dt[t,4] = j
+      result_dt[t,5] = i
+      result_dt[t,6] = f
+      result_dt[t,7] = c 
+    
+    }  
+    
+    for( k in 1:c){
+      
+      average_dt[k,1]  = mean(result_dt[which(result_dt$c==k), ]$total_accuracy)
+      average_dt[k,2]  = mean(result_dt[which(result_dt$c==k), ]$firstaccuracy)
+      average_dt[k,3]  = mean(result_dt[which(result_dt$c==k), ]$secondaccuracy)
+      average_dt[k,4]  = mean(result_dt[which(result_dt$c==k), ]$cp)
+      average_dt[k,5]  = mean(result_dt[which(result_dt$c==k), ]$minbucket)
+      average_dt[k,6]  = mean(result_dt[which(result_dt$c==k), ]$c)
+    }
+  }
+}
+```
+
+```{r DTdata2TEST, cache = TRUE}
+pointer<-which.max(average_dt$total_accuracy)
+total_accuracy_validation_dt<-max(average_dt$total_accuracy)
+cp<-average_dt[pointer,"cp"]
+minbucket<-average_dt[pointer,"minbucket"]
+
+cp
+minbucket
+
+## Testing
+
+model_dt  <- rpart(formula = (V1) ~., method = "class", data = data_train, control = rpart.control(cp=cp,minbucket = minbucket))
+pred_dt   <-  predict(model_dt,data_test ,type = "class")
+test.y <- as.factor(data_test[,ncol(data_test)]) # Son kolon y 
+
+class.pred_dt     <- table(pred_dt,test.y)
+total_accuracy_dt <- sum(diag(class.pred_dt))/sum(class.pred_dt)
+
+rpart.plot(model_dt,cex = 0.75)
+
+total_accuracy_validation_dt
+total_accuracy_dt
+```
+
+## Parameters and Comments on Decision Tree for Dataset #2
+
+Above, the best "minimal number of observations per tree leaf (minbucket)" and "complexity parameter (cp)" parameters are found. The minimal number of observations per tree leaf is 5 and the complexity parameter is 0.01. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 94.7% total accuracy (total_accuracy_validation_dt). With the prediction on test_data, I have obtained 95% total accuracy (total_accuracy_dt). 
+
+94.7% and 95% accuracy are very good. This shows that using a decision tree for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our accuracy has slightly increased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_dt)% and the test error rate can be considered as 100% - (total_accuracy_dt)%. Therefore, it is possible to say that cross-validation error rate of this approach is consistent with the test error rate.
+
+## Applying PRA Method:
+
+```{r PRAData2Grammar, cache =TRUE}
+t=0
+c=0
+
+result_pra <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         l = numeric(),f = numeric(),c = numeric())
+
+average_pra = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         l = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+
+for(l in seq(from=0.01, to=0.1, by=0.02))
+{
+  c=c+1
+  for(f in 1:10){    
+    
+    index <- which(dat[,1] == f )
+    train <- dat[-index, ]
+    train <- train[,-1]
+    test  <- dat[index, ]
+    test  <- test[,-1]
+    
+    model<-glmnet(as.matrix(train[,-ncol(test)]),train[,ncol(test)],alpha=1,lambda = l)
+    prediction <-predict(model, newx= as.matrix(test[,-ncol(test)]), type = "response") 
+    pred <- ifelse(prediction>0.5, 1,0)
+    test.y <- as.factor(test[,ncol(test)]) # Son kolon y 
+    
+    class.pred     <- table(pred,test.y)
+    total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+    firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+    secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+    
+    t=t+1
+    
+    result_pra[t,1] = total_accuracy
+    result_pra[t,2] = firstaccuracy
+    result_pra[t,3] = secondaccuracy
+    result_pra[t,4] = l
+    result_pra[t,5] = f
+    result_pra[t,6] = c 
+    
+  }  
+  
+  for( k in 1:c){
+    
+    average_pra[k,1]  = mean(result_pra[which(result_pra$c==k), ]$total_accuracy)
+    average_pra[k,2]  = mean(result_pra[which(result_pra$c==k), ]$firstaccuracy)
+    average_pra[k,3]  = mean(result_pra[which(result_pra$c==k), ]$secondaccuracy)
+    average_pra[k,4]  = mean(result_pra[which(result_pra$c==k), ]$l)
+    average_pra[k,5]  = mean(result_pra[which(result_pra$c==k), ]$c)
+  }
+  
+}
+```
+
+```{r PRAdata2TEST, cache = TRUE}
+pointer<-which.max(average_pra$total_accuracy)
+total_accuracy_validation_pra<-max(average_pra$total_accuracy)
+lambda<-average_pra[pointer,"l"]
+
+lambda
+
+model_pra <-glmnet(as.matrix(data_train[,-ncol(test)]),data_train[,ncol(test)],alpha=1,family='multinomial',lambda = lambda)
+prediction_pra <-predict(model_pra, newx= as.matrix(data_test[,-ncol(test)]), type = "response") 
+
+pred_pra <- as.factor(colnames(prediction_pra)[apply(prediction_pra,1,which.max)])
+
+test.y <- (data_test[,ncol(test)]) # Son kolon y 
+
+class.pred_pra     <- table(pred_pra,test.y)
+total_accuracy_pra <- sum(diag(class.pred_pra))/sum(class.pred_pra)
+
+total_accuracy_validation_pra
+total_accuracy_pra
+
+```
+
+## Parameters and Comments on Penalized Regression Approach for Dataset #2
+
+Above, the optimum value of the lambda parameter is found as 0.01. The l1 penalty is used.
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal lambda to training data, I have obtained 94% total accuracy (total_accuracy_validation_pra). With the prediction on test data, I have obtained 95% total accuracy (total_accuracy_pra). 
+
+94% and 95% accuracy are very good. This shows that using penalized regression approach for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our accuracy has slightly increased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_pra)% and the test error rate can be considered as 100% - (total_accuracy_pra)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is smaller than the cross-validation error. This means we performed well in the test. 
+
+## Applying Random Forest Method:
+
+```{r RFData2Grammar, cache =TRUE}
+t=0
+c=0
+
+result_rf<- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                       
+                       m = numeric(),f = numeric(), c = numeric())
+
+average_rf= data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                       
+                       m = numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+set.seed(1218)
+
+# m=j 
+
+for(j in seq(from=3, to=20, by=4)){
+  
+  c=c+1
+  for(f in 1:10){    
+    
+    index <- which(dat[,1] == f )
+    train <- dat[-index, ]
+    train <- train[,-1]
+    test  <- dat[index, ]
+    test  <- test[,-1]
+    
+    model  <- randomForest(formula = as.factor(V1) ~., data = train, ntree = 500, nodesize = 5, mtry=j ,importance = T, na.action = na.omit)
+    pred   <- predict(model,test ,type = "class")
+    test.y <- as.factor(test[,ncol(test)]) # Ilk kolon y 
+    
+    class.pred     <- table(pred,test.y)
+    total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+    firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+    secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+    
+    
+    t=t+1
+    
+    result_rf[t,1] = total_accuracy
+    result_rf[t,2] = firstaccuracy
+    result_rf[t,3] = secondaccuracy
+    result_rf[t,4] = j
+    result_rf[t,5] = f
+    result_rf[t,6] = c
+   
+    
+  }  
+  
+  for( k in 1:c){
+    
+    average_rf[k,1]  = mean(result_rf[which(result_rf$c==k), ]$total_accuracy)
+    average_rf[k,2]  = mean(result_rf[which(result_rf$c==k), ]$firstaccuracy)
+    average_rf[k,3]  = mean(result_rf[which(result_rf$c==k), ]$secondaccuracy)
+    average_rf[k,4]  = mean(result_rf[which(result_rf$c==k), ]$m)
+    average_rf[k,5]  = mean(result_rf[which(result_rf$c==k), ]$c)
+  }
+}
+```
+
+```{r RFdata2TEST, cache = TRUE}
+pointer<-which.max(average_rf$total_accuracy)
+total_accuracy_validation_rf<-max(average_rf$total_accuracy)
+m<-average_rf[pointer,"m"]
+
+m
+
+## Testing
+
+model_rf  <- randomForest(formula = as.factor(V1) ~., data = data_train, ntree = 500, nodesize = 5, mtry=m ,importance = T, na.action = na.omit)
+pred_rf   <- predict(model_rf,data_test ,type = "class")
+test.y <- as.factor(data_test[,ncol(data_test)]) # Son kolon y 
+
+class.pred_rf     <- table(pred_rf,test.y)
+total_accuracy_rf <- sum(diag(class.pred_rf))/sum(class.pred_rf)
+
+total_accuracy_validation_rf
+total_accuracy_rf
+```
+
+## Parameters and Comments on Random Forest for Dataset #2
+
+Above, the optimum value of the m parameter is found as 15. J=500 and the minimal number of observations per tree leaf=5.
+
+After finding the optimal m value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal m to training data, I have obtained 96.5% total accuracy (total_accuracy_validation_rf). With the prediction on test data, I have obtained 97.5% total accuracy (total_accuracy_rf). 
+
+96.5% and 97.5% accuracy are very good. This shows that using Random forest for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has increased in the test.
+
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is smaller than the cross-validation error. This means we performed well in the test. 
+
+## Applying SGB Method:
+
+```{r SGBData2Grammar, cache =TRUE}
+c = 0
+t = 0
+result_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        
+                        j = numeric(), n = numeric(), i = numeric(), f = numeric(), c = numeric())
+average_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         
+                         j = numeric(), n = numeric(),i = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+
+
+
+set.seed(128)
+# ntree=j,interaction.depth=n, shrinkage=i =learning rate
+
+for(j in seq(from=50, to=250, by=50)){
+  for(n in seq(from=1, to=5, by=1)){
+    for(i in seq(from=0.01, to=0.2, by=0.04)){
+      c          = c + 1
+      for(f in 1:5){    
+        
+        index    = which(dat [,1] == f )
+        train = dat[-index, ]
+        train = train[ , -c(1)]
+        test  = dat[index, ]
+        test  = test[ , -c(1)]
+        
+        model          <- gbm(formula = V1 ~., data = train, n.trees = j, interaction.depth = n, shrinkage = i,distribution = "bernoulli")
+        prediction     <- (predict(model, newdata=test, n.trees=j,type = "response"))
+
+        test.y       <- test[ , ncol(test)]
+        
+        class.pred   <- table(prediction, test.y)
+        total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+        firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+        secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+
+        
+        t = t+1
+        
+        result_gbm[t,1]  = total_accuracy
+        result_gbm[t,2]  = firstaccuracy
+        result_gbm[t,3]  = secondaccuracy
+        result_gbm[t,4]  = j
+        result_gbm[t,5] = n
+        result_gbm[t,6] = i
+        result_gbm[t,7] = f
+        result_gbm[t,8] = c
+        
+        
+      }
+      for( k in 1:c){
+        
+        average_gbm[k,1]   = mean(result_gbm[which(result_gbm$c==k), ]$total_accuracy)
+        average_gbm[k,2]   = mean(result_gbm[which(result_gbm$c==k), ]$firstaccuracy)
+        average_gbm[k,3]   = mean(result_gbm[which(result_gbm$c==k), ]$secondaccuracy)
+
+        average_gbm[k,4]   = mean(result_gbm[which(result_gbm$c==k), ]$j)
+        average_gbm[k,5]  = mean(result_gbm[which(result_gbm$c==k), ]$n)
+        average_gbm[k,6]  = mean(result_gbm[which(result_gbm$c==k), ]$i)
+        average_gbm[k,7]  = mean(result_gbm[which(result_gbm$c==k), ]$c)
+      }
+    } 
+  }
+}
+```
+
+```{r SGBdata2TEST, cache = TRUE}
+pointer<-which.max(average_gbm$total_accuracy)
+total_accuracy_validation_sgb<-max(average_gbm$total_accuracy)
+ntree<-average_gbm[pointer,"j"]
+depth<-average_gbm[pointer,"n"]
+learningRate<-average_gbm[pointer,"i"]
+
+ntree
+depth
+learningRate
+## Testing
+
+model_sgb          <- gbm(formula = V1 ~., data = data_train, n.trees = ntree, interaction.depth = depth, shrinkage = learningRate,distribution = "bernoulli")
+prediction_sgb     <- (predict(model_sgb, newdata=data_test, n.trees=ntree,type = "response"))
+p.pred_sgb         <- ifelse(prediction_sgb >0.5, 1,0)
+test.y             <- data_test[ , ncol(data_test)]
+
+class.pred_sgb   <- table(p.pred_sgb, test.y)
+
+class.pred_sgb
+
+total_accuracy_sgb=sum(diag(class.pred_sgb))/sum(class.pred_sgb)
+
+total_accuracy_validation_sgb
+total_accuracy_sgb
+```
+
+## Parameters and Comments on Stochastic Gradient Boosting for Dataset #2
+
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 1, the learning rate value is 0.01, and number of trees is 50. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 73% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 80% total accuracy (total_accuracy_sgb). 
+
+73% and 80% accuracy are good enough. This may show that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there isn't any huge difference which means there is no overfitting or underfitting. We can say that our accuracy has increased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is smaller than the cross-validation error. This means we performed well in the test. 
+
+## General Comments on the Results for Dataset #2
+
+First of all, we see that we have obtained really good results without overcoming the class imbalance problem. Normally we should eliminate this problem but for this dataset, we did not have to do it.
+
+We observe that the Random Forest method gave the best cross-validation performance and the best test performance. Stochastic Gradient Boosting method has the worst performance in both cross-validation and test performance above others. The performances of every algorithm were good enough. It is also important to mention that in each method, the test error rate is lower than the cross-validation rate. Which means we performed better during the test.
+
+Important Note: During the evaluation of the accuracy, I used the total accuracy. One could also use "roc" or other metrics. I believe total accuracy is good enough to measure the performances.
+
+
+# Dataset #3 - Superconductivity
+
+## About the dataset: Superconductivity
+
+This dataset is chosen because:
+
+- It has 81 features
+
+- It has labeled features
+
+- It has more than 20000 samples (which is enough to separate it into train + test data)
+
+- It has a brief description of the task and features
+
+- It is a regression problem
+
+Reading the data:
+```{r readData3Superconductivity, cache =TRUE}
+data_set <-  read.csv("C:/Users/Ezgi/Desktop/IE 582/HW4/superconduct/train.csv")
+
+data_set_Index <- sample(1:nrow(data_set), 0.25*nrow(data_set)) 
+data_set       <- data_set[data_set_Index, ]
+
+```
+
+Note: Since the number of samples is high, for computational and iterative purposes samples are eliminated randomly.
+
+Arranging train and test data:
+
+```{r arrangeData3Superconductivity, cache =TRUE}
+Index          <- sample(1:nrow(data_set), 0.75*nrow(data_set)) 
+data_model_set <- data_set[Index, ]  # model data
+data_test_set  <- data_set[-Index, ]   # model test data   
+
+#Randomly shuffle the data
+# division for .60 train .15 test data (for overall data : 25% model test; 60%model train 15%model validation)
+
+Data_set      <- data_model_set[sample(nrow(data_model_set)),]
+folds_set     <- cut(seq(1,nrow(Data_set)),breaks=10,labels=FALSE)
+Reg_data_set  <- cbind(folds_set,Data_set)
+
+train_model <- data_model_set [sample(nrow(data_model_set )),]
+test_model  <- data_test_set[sample(nrow(data_test_set)),]
+
+test_y    <- test_model[ , ncol(test_model)] # prediction ile karşılaştırmak için
+average_y <- mean(test_y) 
+
+train_y    <- train_model[ , ncol(test_model)] # prediction ile karşılaştırmak için
+average_try <- mean(train_y) 
+dat <- Reg_data_set 
+
+```
+
+## Applying Decision Tree Method
+
+```{r DTdata3Superconductivity, cache =TRUE}
+c = 0
+t = 0
+result_dt = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                       cp = numeric(), minbucket=numeric(),  f = numeric(),c = numeric())
+
+average_dt = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                        cp = numeric(), minbucket=numeric(),  c = numeric())
+
+error_fold     = numeric()
+r_squared_fold = numeric()
+rootmse_fold   = numeric()
+
+
+set.seed(121)
+# mtry=j
+
+for(j in seq(from=0.01, to=0.05, by=0.01)){
+  for(i in seq(from=5, to=20, by=2)){
+  prediction = numeric()
+  test.y     = numeric()
+  c          = c + 1  
+  for(f in 1:10){    #10 folds
+   
+    index    = which(dat [,1] == f )
+    train = dat[-index, ]
+    train = train[ , -c(1)]
+    test  = dat[index, ]
+    test  = test[ , -c(1)]
+    average  = mean(test[,ncol(test)])
+    
+    model            <- rpart(formula = as.numeric(critical_temp) ~., method = "anova", data = train, control = rpart.control(cp=j,minbucket = i))
+    prediction       <- predict(model, test[, -ncol(test)])
+    test.y           <- test[ , ncol(test)]
+    
+    error_fold      <- mae( as.matrix(test.y),as.matrix(prediction))
+    r_squared_fold  <- 1-(sum((prediction - test.y)^2) / sum((test.y - average)^2))
+    rootmse_fold   <- rmse(test.y,prediction)
+    
+    
+    t = t+1
+    
+    result_dt[t,1]  = error_fold
+    result_dt[t,2]  = rootmse_fold
+    result_dt[t,3]  = r_squared_fold
+    result_dt[t,4]  = j
+    result_dt[t,5]  = i
+    result_dt[t,6]  = f
+    result_dt[t,7]  = c
+   
+  } 
+  
+  for( k in 1:c){
+    
+    average_dt[k,1]  = mean(result_dt[which(result_dt$c==k), ]$error_fold)
+    average_dt[k,2]  = mean(result_dt[which(result_dt$c==k), ]$rootmse_fold)
+    average_dt[k,3]  = mean(result_dt[which(result_dt$c==k), ]$r_squared_fold)
+    average_dt[k,4]  = mean(result_dt[which(result_dt$c==k), ]$cp)
+    average_dt[k,5]  = mean(result_dt[which(result_dt$c==k), ]$minbucket)
+    average_dt[k,6]  = mean(result_dt[which(result_dt$c==k), ]$c)
+  }
+
+  
+}
+}
+```
+
+```{r DTdata3TEST, cache = TRUE}
+
+pointer<-which.min(average_dt$rootmse_fold)
+cp<-average_dt[pointer,"cp"]
+minbucket<-average_dt[pointer,"minbucket"]
+
+rootmse_validation_dt <- min(average_dt$rootmse_fold)
+cp
+minbucket
+
+model_dt            <- rpart(formula = as.numeric(critical_temp) ~., method = "anova", data = train, control = rpart.control(cp=cp,minbucket = minbucket))
+
+prediction_test_dt  <- predict(model_dt, test_model[, -ncol(test_model)])
+prediction_train_dt <- predict(model_dt, train_model[, -ncol(train_model)])   
+lim              <- max(prediction_test_dt,prediction_train_dt) + 100
+
+error_test_dt      <- mae( as.matrix(test_y),as.matrix(prediction_test_dt))
+r_squared_test_dt  <- 1-(sum((prediction_test_dt - test_y)^2)/sum((test_y - average_y)^2))
+rootmse_test_dt    <- rmse(test_y,prediction_test_dt)
+ 
+
+rpart.plot(model_dt,cex = 0.75)
+
+#Plot train
+plot(train_model[ , ncol(train_model)], prediction_train_dt, main = "Train Set Results of Decision Tree (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+#Plot test
+plot(test_model[ , ncol(test_model)], prediction_test_dt, main = "Test Set Results of Decision Tree (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+
+rootmse_validation_dt
+rootmse_test_dt
+```
+
+## Parameters and Comments on Decision Tree for Dataset #3
+
+Above, the best "minimal number of observations per tree leaf (minbucket)" and "complexity parameter (cp)" parameters are found. The minimal number of observations per tree leaf is 5 and the complexity parameter is 0.01. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the root mean square error by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained the cross-validation error (root mse) as 18 (rootmse_validation_dt). With the prediction on test data, I have obtained the test error (root mse) as 18.4 (rootmse_test_dt). 
+
+This shows that using a decision tree for this dataset might be suitable. Furthermore, when we look at the root mean square error on the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our performance has slightly decreased in the test.
+
+Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate.
+
+Furthermore, predictions and observations for both test data and the train data are plotted above. They also show how we performed.
+
+## Applying PRA Method:
+
+```{r PRAdata3Superconductivity, cache =TRUE}
+c = 0
+t = 0
+result_pra = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                       l = numeric(),  f = numeric(),c = numeric())
+
+average_pra = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                        l = numeric(),  c = numeric())
+
+error_fold     = numeric()
+r_squared_fold = numeric()
+rootmse_fold   = numeric()
+
+
+set.seed(121)
+# lambda=l
+
+for(l in seq(from=0.01, to=0.1, by=0.02)){
+  prediction = numeric()
+  test.y     = numeric()
+  c          = c + 1  
+  for(f in 1:10){    #10 folds
+    
+    
+    index    = which(dat [,1] == f )
+    train = dat[-index, ]
+    train = train[ , -c(1)]
+    test  = dat[index, ]
+    test  = test[ , -c(1)]
+    average  = mean(test[,ncol(test)])
+    
+    model            <-glmnet(as.matrix(train[,-ncol(test)]),train[,ncol(test)],alpha=1,family='gaussian',lambda = l)
+    prediction       <- predict(model, newx= as.matrix(test[, -ncol(test)]), type = "response")
+    test.y           <- test[ , ncol(test)]
+    
+    
+    error_fold      <- mae( as.matrix(test.y),as.matrix(prediction))
+    r_squared_fold  <- 1-(sum((prediction - test.y)^2) / sum((test.y - average)^2))
+    rootmse_fold   <- rmse(test.y,prediction)
+    
+    
+    t = t+1
+    
+    result_pra[t,1]  = error_fold
+    result_pra[t,2]  = rootmse_fold
+    result_pra[t,3]  = r_squared_fold
+    result_pra[t,4]  = l
+    result_pra[t,5]  = f
+    result_pra[t,6]  = c
+    
+    
+    
+  } 
+  
+  for( k in 1:c){
+    
+    average_pra[k,1]  = mean(result_pra[which(result_pra$c==k), ]$error_fold)
+    average_pra[k,2]  = mean(result_pra[which(result_pra$c==k), ]$rootmse_fold)
+    average_pra[k,3]  = mean(result_pra[which(result_pra$c==k), ]$r_squared_fold)
+    average_pra[k,4]  = mean(result_pra[which(result_pra$c==k), ]$l)
+    average_pra[k,5]  = mean(result_pra[which(result_pra$c==k), ]$c)
+  }
+  
+}
+```
+
+```{r PRAdata3TEST, cache = TRUE}
+pointer<-which.min(average_pra$rootmse_fold)
+lambda<-average_pra[pointer,"l"]
+lambda
+rootmse_validation_pra <- min(average_pra$rootmse_fold)
+
+model_pra            <-glmnet(as.matrix(train[,-ncol(test_model)]),as.matrix(train[,ncol(test_model)]),alpha=1,family='gaussian',lambda = lambda)
+prediction_test_pra <- predict(model_pra, newx= as.matrix(test_model[, -ncol(test_model)]), type = "response")
+prediction_train_pra <- predict(model_pra, newx= as.matrix(train_model[, -ncol(train_model)]), type = "response")   
+lim              <- max(prediction_test_pra,prediction_train_pra) + 100
+
+error_test_pra      <- mae( as.matrix(test_y),as.matrix(prediction_test_pra))
+r_squared_test_pra  <- 1-(sum((prediction_test_pra - test_y)^2)/sum((test_y - average_y)^2))
+rootmse_test_pra    <- rmse(test_y,prediction_test_pra)
+
+#Plot train
+plot(train_model[ , ncol(train_model)], prediction_train_pra, main = "Train Set Results of PRA (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+#Plot test
+plot(test_model[ , ncol(test_model)], prediction_test_pra, main = "Test Set Results of PRA (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+
+rootmse_validation_pra
+rootmse_test_pra
+```
+
+## Parameters and Comments on Penalized Regression Approach for Dataset #3
+
+Above, the optimum value of the lambda parameter is found as 0.01. The l1 penalty is used.        
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the root mean square error by comparing the predicted values and the real values. Performing prediction with the optimal parameter to training data, I have obtained the cross-validation error (root mse) as 17.8 (rootmse_validation_pra). With the prediction on test data, I have obtained the test error (root mse) as 17.5 (rootmse_test_pra). 
+
+This shows that using penalized regression approach for this dataset is suitable. Furthermore, when we look at the root mean square error on the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our performance has slightly increased in the test.
+
+Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is smaller than the cross-validation error. This means we performed well in the test. 
+
+Furthermore, predictions and observations for both test data and the train data are plotted above. They also show that we did well.
+
+## Applying Random Forest Method:
+
+```{r RFData3Superconductivity, cache =TRUE}
+c = 0
+t = 0
+result_rf = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                       mtry = numeric(),  f = numeric(),c = numeric())
+
+average_rf = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                         mtry = numeric(),  c = numeric())
+
+error_fold     = numeric()
+r_squared_fold = numeric()
+rootmse_fold   = numeric()
+
+
+set.seed(121)
+# mtry=j
+
+for(j in seq(from=5, to=50, by=10)){
+    prediction = numeric()
+    test.y     = numeric()
+    c          = c + 1  
+    for(f in 1:10){    #10 folds
+      
+      index    = which(dat [,1] == f )
+      train = dat[-index, ]
+      train = train[ , -c(1)]
+      test  = dat[index, ]
+      test  = test[ , -c(1)]
+      average  = mean(test[,ncol(test)])
+      
+      model            <- randomForest(formula = as.numeric(critical_temp) ~., data = train, ntree = 500, nodesize = 5, mtry=j ,importance = T, na.action = na.omit)
+      prediction       <- predict(model, test[, -ncol(test)], type = "response")
+      test.y           <- test[ , ncol(test)]
+      
+      
+      error_fold      <- mae( as.matrix(test.y),as.matrix(prediction))
+      r_squared_fold  <- 1-(sum((prediction - test.y)^2) / sum((test.y - average)^2))
+      rootmse_fold   <- rmse(test.y,prediction)
+      
+      
+      t = t+1
+      
+      result_rf[t,1]  = error_fold
+      result_rf[t,2]  = rootmse_fold
+      result_rf[t,3]  = r_squared_fold
+      result_rf[t,4]  = j
+      result_rf[t,5]  = f
+      result_rf[t,6]  = c
+
+    } 
+    
+    for( k in 1:c){
+  
+  average_rf[k,1]  = mean(result_rf[which(result_rf$c==k), ]$error_fold)
+  average_rf[k,2]  = mean(result_rf[which(result_rf$c==k), ]$rootmse_fold)
+  average_rf[k,3]  = mean(result_rf[which(result_rf$c==k), ]$r_squared_fold)
+  average_rf[k,4]  = mean(result_rf[which(result_rf$c==k), ]$mtry)
+  average_rf[k,5]  = mean(result_rf[which(result_rf$c==k), ]$c)
+    }
+
+  
+}
+```
+
+```{r RFdata3TEST, cache = TRUE}
+pointer<-which.min(average_rf$rootmse_fold)
+m<-average_rf[pointer,"mtry"]
+m
+rootmse_validation_rf <- min(average_rf$rootmse_fold)
+  
+model_rf            <- randomForest(formula = as.numeric(critical_temp) ~., data = train_model, ntree = 500, nodesize = 5, mtry=m , importance = T, na.action = na.omit)
+prediction_test_rf  <- predict(model_rf, test_model[, -ncol(test_model)], type = "response")
+prediction_train_rf <- predict(model_rf, train_model[, -ncol(train_model)], type = "response")   
+lim              <- max(prediction_test_rf,prediction_train_rf) + 100
+
+ error_test_rf      <- mae( as.matrix(test_y),as.matrix(prediction_test_rf))
+ r_squared_test_rf  <- 1-(sum((prediction_test_rf - test_y)^2)/sum((test_y - average_y)^2))
+ rootmse_test_rf    <- rmse(test_y,prediction_test_rf)
+
+#Plot train
+plot(train_model[ , ncol(train_model)], prediction_train_rf, main = "Train Set Results of Random Forest (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+#Plot test
+plot(test_model[ , ncol(test_model)], prediction_test_rf, main = "Test Set Results of Random Forest (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+
+rootmse_validation_rf
+rootmse_test_rf
+```
+
+## Parameters and Comments on Random Forest Approach for Dataset #3
+
+Above, the optimum value of the m parameter is found as 15. J=500 and the minimal number of observations per tree leaf=5.       
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the root mean square error by comparing the predicted values and the real values. Performing prediction with the optimal parameter to training data, I have obtained the cross-validation error (root mse) as 11.4 (rootmse_validation_rf). With the prediction on test data, I have obtained the test error (root mse) as 11.5 (rootmse_test_rf). 
+
+This shows that using the random forest approach for this dataset is suitable. Furthermore, when we look at the root mean square error on the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our performance has slightly decreased in the test.
+
+Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is slightly greater than the cross-validation error. 
+
+Furthermore, predictions and observations for both test data and the train data are plotted above. They also show that we did well.
+
+## Applying SGB Method:
+
+```{r SGBData3Superconductivity, cache =TRUE}
+c = 0
+t = 0
+result_sgb = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                        j = numeric(), n = numeric(), i = numeric(),  f = numeric(),c = numeric())
+
+average_sgb = data.frame(error_fold = numeric(), rootmse_fold = numeric(), r_squared_fold = numeric(),
+                         j = numeric(), n = numeric(), i = numeric(),  c = numeric())
+
+error_fold     = numeric()
+r_squared_fold = numeric()
+rootmse_fold   = numeric()
+
+
+set.seed(121)
+# ntree=j,interaction.depth=n, shrinkage=i =learning rate
+
+for(j in seq(from=50, to=250, by=50)){
+  for(n in seq(from=1, to=10, by=2)){
+    for(i in seq(from=0.01, to=0.2, by=0.04)){
+  prediction = numeric()
+  test.y     = numeric()
+  c          = c + 1  
+  for(f in 1:10){    #10 folds
+   
+    index    = which(dat [,1] == f )
+    train = dat[-index, ]
+    train = train[ , -c(1)]
+    test  = dat[index, ]
+    test  = test[ , -c(1)]
+    average  = mean(test[,ncol(test)])
+    
+    model          <- gbm(formula = critical_temp ~., data = train, n.trees = j, interaction.depth = n, shrinkage = i,distribution = "gaussian")
+    prediction       <- predict(model, test[, -ncol(test)],n.trees = j, type = "response")
+    test.y           <- test[ , ncol(test)]
+    
+    
+    error_fold      <- mae( as.matrix(test.y),as.matrix(prediction))
+    r_squared_fold  <- 1-(sum((prediction - test.y)^2) / sum((test.y - average)^2))
+    rootmse_fold   <- rmse(test.y,prediction)
+    
+    
+    t = t+1
+    
+    result_sgb[t,1]  = error_fold
+    result_sgb[t,2]  = rootmse_fold
+    result_sgb[t,3]  = r_squared_fold
+    result_sgb[t,4]  = j
+    result_sgb[t,5]  = n
+    result_sgb[t,6]  = i
+    result_sgb[t,7]  = f
+    result_sgb[t,8]  = c
+
+  } 
+  
+  for( k in 1:c){
+    
+    average_sgb[k,1]  = mean(result_sgb[which(result_sgb$c==k), ]$error_fold)
+    average_sgb[k,2]  = mean(result_sgb[which(result_sgb$c==k), ]$rootmse_fold)
+    average_sgb[k,3]  = mean(result_sgb[which(result_sgb$c==k), ]$r_squared_fold)
+    average_sgb[k,4]  = mean(result_sgb[which(result_sgb$c==k), ]$j)
+    average_sgb[k,5]  = mean(result_sgb[which(result_sgb$c==k), ]$n)
+    average_sgb[k,6]  = mean(result_sgb[which(result_sgb$c==k), ]$i)
+    average_sgb[k,7]  = mean(result_sgb[which(result_sgb$c==k), ]$c)
+  }
+    }
+  }
+}
+```
+
+```{r SGBdata3TEST, cache = TRUE}
+pointer<-which.min(average_sgb$rootmse_fold)
+
+rootmse_validation_sgb <- min(average_sgb$rootmse_fold)
+
+ntree<-average_sgb[pointer,"j"]
+depth<-average_sgb[pointer,"n"]
+learningRate<-average_sgb[pointer,"i"]
+
+ntree
+depth
+learningRate
+
+
+model_sgb            <- gbm(formula = critical_temp ~., data = train, n.trees = ntree, interaction.depth = depth, shrinkage = learningRate,distribution = "gaussian")
+prediction_test_sgb  <- predict(model_sgb, test_model[, -ncol(test_model)], type = "response")
+prediction_train_sgb <- predict(model_sgb, train_model[, -ncol(train_model)], type = "response")   
+lim              <- max(prediction_test_sgb,prediction_train_sgb) + 100
+
+error_test_sgb      <- mae( as.matrix(test_y),as.matrix(prediction_test_sgb))
+r_squared_test_sgb  <- 1-(sum((prediction_test_sgb - test_y)^2)/sum((test_y - average_y)^2))
+rootmse_test_sgb    <- rmse(test_y,prediction_test_sgb)
+
+#Plot train
+plot(train_model[ , ncol(train_model)], prediction_train_sgb, main = "Train Set Results of SGB (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+#Plot test
+plot(test_model[ , ncol(test_model)], prediction_test_sgb, main = "Test Set Results of SGB (10-folds)", xlab = "Observed", ylab = "Predicted",
+     pch = 19, cex.axis = 1.5, xlim = c(0,lim), ylim = c(0,lim), cex.lab = 1)
+abline(0, 1, lwd = 1, col = "red")
+
+rootmse_validation_sgb
+rootmse_test_sgb
+```
+
+## Parameters and Comments on Stochastic Gradient Boosting for Dataset #3
+
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 9, the learning rate value is 0.09, and number of trees is 250. 
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the root mean square error by comparing the predicted values and the real values. Performing prediction with the optimal parameter to training data, I have obtained the cross-validation error (root mse) as 11.97 (rootmse_validation_sgb). With the prediction on test data, I have obtained the test error (root mse) as 12 (rootmse_test_sgb). 
+
+This shows that using a stochastic gradient boosting approach for this dataset is suitable. Furthermore, when we look at the root mean square error on the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our performance has slightly decreased in the test.
+
+Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is slightly greater than the cross-validation error. 
+
+Furthermore, predictions and observations for both test data and the train data are plotted above. They also show that we did well.
+
+## General Comments on the Results for Dataset #3
+
+First of all, we see that we have obtained really good results.
+
+We observe that the Random Forest method gave the best cross-validation performance and the best test performance. Decision Tree method has the worst performance in both cross-validation and test performance above others. This was expected because we know that decision trees are generally for classification purposes, not for predictions. The performances of every algorithm were good enough. 
+
+Important Note: During the evaluation of the accuracy, I used the root mean square error. A different metric could also be used. I believe root mean square error is good enough to measure the performances.
+
+# Dataset #4 - Forest Types
+
+## About the dataset: Forest Types
+
+This dataset is chosen because:
+
+- It has 20 features
+
+- It has labeled features
+
+- It has more than 500 samples (train + test data)
+
+- It has a brief description of the task and features
+
+- It is a multi-class classification problem
+
+Reading the dataset:
+```{r readingData4ForestTypes, cache =TRUE}
+dataset4_1 <- read.csv("C:/Users/Ezgi/Desktop/IE 582/HW4/ForestTypes/testing.csv", stringsAsFactors = TRUE)
+dataset4_2 <- read.csv("C:/Users/Ezgi/Desktop/IE 582/HW4/ForestTypes/training.csv", stringsAsFactors = TRUE)
+
+dataset4<-rbind(dataset4_1,dataset4_2)
+```
+
+Arranging train and test data:
+
+```{r arrangeData4ForestTypes, cache =TRUE}
+
+set.seed(123) # Random olan seyleri fixliyor. (burada yazan sayinin onemi yok)
+
+Index      <- sample(1:nrow(dataset4), 0.7*nrow(dataset4)) 
+data_train <- dataset4[Index, ]  # model data
+data_test  <- dataset4[-Index, ]   # model test data   
+
+folds     <- cut(seq(1,nrow(data_train)),breaks=10,labels=FALSE)
+Class_data  <- cbind(folds,data_train)
+dat<-Class_data 
+
+```
+
+## Applying Decision Tree Method
+
+```{r DTdata4ForestTypes, cache =TRUE}
+#### DT ####
+
+
+t=0
+c=0
+
+result_dt <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                        cp = numeric(), minbucket=numeric(),f = numeric(),c = numeric())
+
+average_dt = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                            thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                            cp = numeric(),minbucket=numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+thirdaccuracy = numeric()
+fourthaccuracy = numeric()
+
+#start<-Sys.time()
+set.seed(1218)
+
+# minbucket=i, cp=j 
+
+for(j in seq(from=0.01, to=0.05, by=0.01)){
+  for(i in seq(from=5, to=20, by=2)){
+    c=c+1
+    for(f in 1:10){    
+      
+      index <- which(dat[,1] == f )
+      train <- dat[-index, ]
+      train <- train[,-1]
+      test  <- dat[index, ]
+      test  <- test[,-1]
+      
+      model  <- rpart(formula = (class) ~., method = "class", data = train, control = rpart.control(cp=j,minbucket = i))
+      pred   <-  predict(model,test ,type = "class")
+      test.y <- as.factor(test[,1]) # Ilk kolon y 
+      
+      class.pred     <- table(pred,test.y)
+      total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+      firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+      secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+      thirdaccuracy  <- class.pred[3,3]/sum(class.pred[3,])
+      fourthaccuracy <- class.pred[4,4]/sum(class.pred[4,])
+      
+      
+      t=t+1
+      
+      result_dt[t,1] = total_accuracy
+      result_dt[t,2] = firstaccuracy
+      result_dt[t,3] = secondaccuracy
+      result_dt[t,4] = thirdaccuracy
+      result_dt[t,5] = fourthaccuracy
+      result_dt[t,6] = j
+      result_dt[t,7] = i
+      result_dt[t,8] = f
+      result_dt[t,9] = c 
+      
+      
+      #print(c("alive","cp=",j,"f=",f))     
+    }  
+    
+    for( k in 1:c){
+      
+      average_dt[k,1]  = mean(result_dt[which(result_dt$c==k), ]$total_accuracy)
+      average_dt[k,2]  = mean(result_dt[which(result_dt$c==k), ]$firstaccuracy)
+      average_dt[k,3]  = mean(result_dt[which(result_dt$c==k), ]$secondaccuracy)
+      average_dt[k,4]  = mean(result_dt[which(result_dt$c==k), ]$thirdaccuracy)
+      average_dt[k,5]  = mean(result_dt[which(result_dt$c==k), ]$fourthaccuracy)
+      average_dt[k,6]  = mean(result_dt[which(result_dt$c==k), ]$cp)
+      average_dt[k,7]  = mean(result_dt[which(result_dt$c==k), ]$minbucket)
+      average_dt[k,8]  = mean(result_dt[which(result_dt$c==k), ]$c)
+    }
+
+  }
+  
+}
+```
+
+```{r DTdata4TEST, cache = TRUE}
+pointer<-which.max(average_dt$total_accuracy)
+total_accuracy_validation_dt<-max(average_dt$total_accuracy)
+cp<-average_dt[pointer,"cp"]
+minbucket<-average_dt[pointer,"minbucket"]
+
+cp
+minbucket
+## Testing
+
+model_dt  <- rpart(formula = (class) ~., method = "class", data = data_train, control = rpart.control(cp=cp,minbucket = minbucket))
+pred_dt   <-  predict(model_dt,data_test ,type = "class")
+test.y <- as.factor(data_test[,1]) # Ilk kolon y 
+
+class.pred_dt     <- table(pred_dt,test.y)
+total_accuracy_dt <- sum(diag(class.pred_dt))/sum(class.pred_dt)
+
+rpart.plot(model_dt,cex = 0.75)
+
+class.pred_dt
+
+total_accuracy_validation_dt
+total_accuracy_dt
+```
+
+## Parameters and Comments on Decision Tree for Dataset #4
+
+Above, the best "minimal number of observations per tree leaf (minbucket)" and "complexity parameter (cp)" parameters are found. The minimal number of observations per tree leaf is 9 and the complexity parameter is 0.01. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 86% total accuracy (total_accuracy_validation_dt). With the prediction on test_data, I have obtained 85% total accuracy (total_accuracy_dt). 
+
+86% and 85% accuracy are very good. This shows that using a decision tree for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our accuracy has slightly decreased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_dt)% and the test error rate can be considered as 100% - (total_accuracy_dt)%. Therefore, it is possible to say that cross-validation error rate of this approach is consistent with the test error rate.
+
+Moreover, we could also observe the performance from the table "class.pred_dt" above.
+
+## Applying PRA Method
+
+```{r PRAdata4ForestTypes, cache =TRUE}
+#### PRA ####
+
+t=0
+c=0
+
+result_pra <- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                        l = numeric(),f = numeric(),c = numeric())
+
+average_pra = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                        l = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+thirdaccuracy = numeric()
+fourthaccuracy = numeric()
+
+
+for(l in seq(from=0.01, to=0.1, by=0.02))
+  {
+  c=c+1
+  for(f in 1:10){    
+    
+    index <- which(dat[,1] == f )
+    train <- dat[-index, ]
+    train <- train[,-1]
+    test  <- dat[index, ]
+    test  <- test[,-1]
+    
+    model<-glmnet(as.matrix(train[,-1]),train[,1],alpha=1,family='multinomial',lambda = l)
+    prediction <-predict(model, newx= as.matrix(test[,-1]), type = "response") 
+    pred <- apply(prediction, 1, which.max)
+    test.y <- as.factor(test[,1]) # Ilk kolon y 
+    
+    class.pred     <- table(pred,test.y)
+    total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+    firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+    secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+    thirdaccuracy  <- class.pred[3,3]/sum(class.pred[3,])
+    fourthaccuracy <- class.pred[4,4]/sum(class.pred[4,])
+    
+    
+    t=t+1
+    
+    result_pra[t,1] = total_accuracy
+    result_pra[t,2] = firstaccuracy
+    result_pra[t,3] = secondaccuracy
+    result_pra[t,4] = thirdaccuracy
+    result_pra[t,5] = fourthaccuracy
+    result_pra[t,6] = l
+    result_pra[t,7] = f
+    result_pra[t,8] = c 
+    
+  }  
+  
+  for( k in 1:c){
+    
+    average_pra[k,1]  = mean(result_pra[which(result_pra$c==k), ]$total_accuracy)
+    average_pra[k,2]  = mean(result_pra[which(result_pra$c==k), ]$firstaccuracy)
+    average_pra[k,3]  = mean(result_pra[which(result_pra$c==k), ]$secondaccuracy)
+    average_pra[k,4]  = mean(result_pra[which(result_pra$c==k), ]$thirdaccuracy)
+    average_pra[k,5]  = mean(result_pra[which(result_pra$c==k), ]$fourthaccuracy)
+    average_pra[k,6]  = mean(result_pra[which(result_pra$c==k), ]$l)
+    average_pra[k,7]  = mean(result_pra[which(result_pra$c==k), ]$c)
+  }
+  
+}
+# Applying Decision Tree Method
+
+```
+
+
+
+```{r PRAdata4TEST, cache = TRUE}
+pointer<-which.max(average_pra$total_accuracy)
+total_accuracy_validation_pra<-max(average_pra$total_accuracy)
+lambda<-average_pra[pointer,"l"]
+
+
+lambda
+## Testing
+
+model_pra <-glmnet(as.matrix(data_train[,-1]),data_train[,1],alpha=1,family='multinomial',lambda = lambda)
+prediction_pra <-predict(model_pra, newx= as.matrix(data_test[,-1]), type = "response") 
+pred_pra <- apply(prediction_pra, 1, which.max)
+test.y <- as.factor(data_test[,1]) # Ilk kolon y 
+
+class.pred_pra     <- table(pred_pra,test.y)
+total_accuracy_pra <- sum(diag(class.pred_pra))/sum(class.pred_pra)
+
+class.pred_pra
+total_accuracy_validation_pra
+total_accuracy_pra
+```
+
+## Parameters and Comments on Penalized Regression Approach for Dataset #4
+
+Above, the optimum value of the lambda parameter is found as 0.01. The l1 penalty is used.
+
+After finding the optimal lambda value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal lambda to training data, I have obtained 89% total accuracy (total_accuracy_validation_pra). With the prediction on test data, I have obtained 87% total accuracy (total_accuracy_pra). 
+
+89% and 87% accuracy are very good. This shows that using penalized regression approach for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that test performance is very close to cross-validation performance which means that there is no overfitting or underfitting. We can say that our accuracy has slightly decreased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_pra)% and the test error rate can be considered as 100% - (total_accuracy_pra)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. 
+
+Moreover, we could also observe the performance from the table "class.pred_pra" above.
+
+## Applying Random Forest Method
+
+```{r RFdata4ForestTypes, cache =TRUE}
+#### RF ####
+
+t=0
+c=0
+
+result_rf<- data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                        m = numeric(),f = numeric(), c = numeric())
+
+average_rf= data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                            thirdaccuracy = numeric(), fourthaccuracy = numeric(),
+                            m = numeric(), c = numeric())
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+thirdaccuracy = numeric()
+fourthaccuracy = numeric()
+
+#start<-Sys.time()
+set.seed(1218)
+
+# m=j 
+
+for(j in seq(from=3, to=20, by=4)){
+  
+    c=c+1
+    for(f in 1:10){    
+      
+      index <- which(dat[,1] == f )
+      train <- dat[-index, ]
+      train <- train[,-1]
+      test  <- dat[index, ]
+      test  <- test[,-1]
+      
+      model  <- randomForest(formula = class ~., data = train, ntree = 500, nodesize = 5, mtry=j ,importance = T, na.action = na.omit)
+      pred   <- predict(model,test ,type = "class")
+      test.y <- as.factor(test[,1]) # Ilk kolon y 
+      
+      class.pred     <- table(pred,test.y)
+      total_accuracy <- sum(diag(class.pred))/sum(class.pred)
+      firstaccuracy  <- class.pred[1,1]/sum(class.pred[1,])
+      secondaccuracy <- class.pred[2,2]/sum(class.pred[2,]) 
+      thirdaccuracy  <- class.pred[3,3]/sum(class.pred[3,])
+      fourthaccuracy <- class.pred[4,4]/sum(class.pred[4,])
+      
+      
+      t=t+1
+      
+      result_rf[t,1] = total_accuracy
+      result_rf[t,2] = firstaccuracy
+      result_rf[t,3] = secondaccuracy
+      result_rf[t,4] = thirdaccuracy
+      result_rf[t,5] = fourthaccuracy
+      result_rf[t,6] = j
+      result_rf[t,7] = f
+      result_rf[t,8] = c
+
+      
+      #print(c("alive","m=",j,"f=",f))     
+    }  
+    
+    for( k in 1:c){
+      
+      average_rf[k,1]  = mean(result_rf[which(result_rf$c==k), ]$total_accuracy)
+      average_rf[k,2]  = mean(result_rf[which(result_rf$c==k), ]$firstaccuracy)
+      average_rf[k,3]  = mean(result_rf[which(result_rf$c==k), ]$secondaccuracy)
+      average_rf[k,4]  = mean(result_rf[which(result_rf$c==k), ]$thirdaccuracy)
+      average_rf[k,5]  = mean(result_rf[which(result_rf$c==k), ]$fourthaccuracy)
+      average_rf[k,6]  = mean(result_rf[which(result_rf$c==k), ]$m)
+      average_rf[k,7]  = mean(result_rf[which(result_rf$c==k), ]$c)
+    }
+}
+
+```
+
+```{r RFdata4TEST, cache = TRUE}
+pointer<-which.max(average_rf$total_accuracy)
+total_accuracy_validation_rf<-max(average_rf$total_accuracy)
+m<-average_rf[pointer,"m"]
+
+m
+## Testing
+
+model_rf  <- randomForest(formula = class ~., data = data_train, ntree = 500, nodesize = 5, mtry=m ,importance = T, na.action = na.omit)
+pred_rf   <- predict(model_rf,data_test ,type = "class")
+test.y <- as.factor(data_test[,1]) # Ilk kolon y 
+
+class.pred_rf     <- table(pred_rf,test.y)
+total_accuracy_rf <- sum(diag(class.pred_rf))/sum(class.pred_rf)
+
+class.pred_rf
+
+total_accuracy_validation_rf
+total_accuracy_rf
+```
+
+## Parameters and Comments on Random Forest for Dataset #2
+
+Above, the optimum value of the m parameter is found as 3. J=500 and the minimal number of observations per tree leaf=5.
+
+After finding the optimal m value, I applied the method with the optimum lambda value and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal m to training data, I have obtained 88% total accuracy (total_accuracy_validation_rf). With the prediction on test data, I have obtained 90% total accuracy (total_accuracy_rf). 
+
+88% and 90% accuracy are very good. This shows that using Random forest for this dataset is suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has increased in the test.
+
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. Our test error is smaller than the cross-validation error. This means we performed well in the test. 
+
+Moreover, we could also observe the performance from the table "class.pred_rf" above.
+
+## Appliyng SGB Method:
+
+```{r SGBdata4ForestTypes, cache =TRUE}
+#### SGB ####
+
+
+c = 0
+t = 0
+result_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                        thirdaccuracy = numeric(), fourthaccuracy = numeric(), 
+                        j = numeric(), n = numeric(), i = numeric(), f = numeric(), c = numeric())
+average_gbm = data.frame(total_accuracy = numeric(), firstaccuracy = numeric(), secondaccuracy = numeric(),
+                         thirdaccuracy = numeric(), fourthaccuracy = numeric(), 
+                         j = numeric(), n = numeric(),i = numeric(), c = numeric())
+
+total_accuracy = numeric()
+firstaccuracy = numeric()
+secondaccuracy = numeric()
+thirdaccuracy = numeric()
+fourthaccuracy = numeric()
+
+options(warn=-1)
+#start <- Sys.time()
+
+set.seed(128)
+# ntree=j,interaction.depth=n, shrinkage=i =learning rate
+
+for(j in seq(from=50, to=250, by=50)){
+  for(n in seq(from=1, to=10, by=2)){
+    for(i in seq(from=0.01, to=0.2, by=0.04)){
+      c          = c + 1
+      for(f in 1:5){    
+        
+        index    = which(dat [,1] == f )
+        train = dat[-index, ]
+        train = train[ , -c(1)]
+        test  = dat[index, ]
+        test  = test[ , -c(1)]
+        
+        model          <- gbm(formula = as.factor(class) ~., data = train, n.trees = j, interaction.depth = n, shrinkage = i,distribution = "multinomial")
+        prediction     <- (predict(model, newdata=test, n.trees=j,type = "response"))
+        p.pred <- apply(prediction, 1, which.max)
+        test.y       <- test[ , 1]
+        
+        class.pred   <- table(p.pred, test.y)
+       
+        total_accuracy=sum(diag(class.pred))/sum(class.pred)
+        firstaccuracy=class.pred[1,1]/sum(class.pred[1,])
+        secondaccuracy=class.pred[2,2]/sum(class.pred[2,]) 
+        thirdaccuracy=class.pred[3,3]/sum(class.pred[3,])
+        fourthaccuracy=class.pred[4,4]/sum(class.pred[4,])
+        
+       
+        t = t+1
+        
+        result_gbm[t,1]  = total_accuracy
+        result_gbm[t,2]  = firstaccuracy
+        result_gbm[t,3]  = secondaccuracy
+        result_gbm[t,4]  = thirdaccuracy
+        result_gbm[t,5]  = fourthaccuracy
+        result_gbm[t,6]  = j
+        result_gbm[t,7] = n
+        result_gbm[t,8] = i
+        result_gbm[t,9] = f
+        result_gbm[t,10] = c
+        
+        
+      }
+      for( k in 1:c){
+        
+        average_gbm[k,1]   = mean(result_gbm[which(result_gbm$c==k), ]$total_accuracy)
+        average_gbm[k,2]   = mean(result_gbm[which(result_gbm$c==k), ]$firstaccuracy)
+        average_gbm[k,3]   = mean(result_gbm[which(result_gbm$c==k), ]$secondaccuracy)
+        average_gbm[k,4]   = mean(result_gbm[which(result_gbm$c==k), ]$thirdaccuracy)
+        average_gbm[k,5]   = mean(result_gbm[which(result_gbm$c==k), ]$fourthaccuracy)
+        average_gbm[k,6]   = mean(result_gbm[which(result_gbm$c==k), ]$j)
+        average_gbm[k,7]  = mean(result_gbm[which(result_gbm$c==k), ]$n)
+        average_gbm[k,8]  = mean(result_gbm[which(result_gbm$c==k), ]$i)
+        average_gbm[k,9]  = mean(result_gbm[which(result_gbm$c==k), ]$c)
+      }
+    } 
+  }
+}
+```
+
+```{r SGBdata4TEST, cache= TRUE}
+pointer<-which.max(average_gbm$total_accuracy)
+total_accuracy_validation_sgb<-max(average_gbm$total_accuracy)
+ntree<-average_gbm[pointer,"j"]
+depth<-average_gbm[pointer,"n"]
+learningRate<-average_gbm[pointer,"i"]
+
+ntree 
+depth
+learningRate
+## Testing
+
+model_sgb          <- gbm(formula = as.factor(class) ~., data = data_train, n.trees = ntree, interaction.depth = depth, shrinkage = learningRate,distribution = "multinomial")
+prediction_sgb     <- (predict(model_sgb, newdata=data_test, n.trees=j,type = "response"))
+p.pred_sgb         <- apply(prediction_sgb, 1, which.max)
+test.y             <- data_test[ , 1]
+
+class.pred_sgb   <- table(p.pred_sgb, test.y)
+
+total_accuracy_sgb=sum(diag(class.pred_sgb))/sum(class.pred_sgb)
+
+class.pred_sgb
+total_accuracy_validation_sgb
+total_accuracy_sgb
+
+```
+
+## Parameters and Comments on Stochastic Gradient Boosting for Dataset #4
+
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 3, the learning rate value is 0.09, and number of trees is 200. 
+
+After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 92% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 980% total accuracy (total_accuracy_sgb). 
+
+92% and 90% accuracy are very good. This shows that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there isn't any huge difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.
+
+Note: cross-validation error rate can be considered as 100% - (total_accuracy_validation_rf)% and the test error rate can be considered as 100% - (total_accuracy_rf)%. Therefore, it is possible to say that the cross-validation error rate of this approach is consistent with the test error rate. 
+
+Moreover, we could also observe the performance from the table "class.pred_sgb" above.
+
+## General Comments on the Results for Dataset #4
+
+First of all, we see that we have obtained really good results without overcoming the class imbalance problem. Normally we should eliminate this problem but for this dataset, we did not have to do it.
+
+We observe that the Stochastic Gradient Boosting method gave the best cross-validation performance and, Stochastic Gradient Boosting and also Random Forest best test performance. Their test accuracy is almost equal. Decision Tree method has the worst performance in both cross-validation and test performance above others. The performances of every algorithm were good.
+
+Important Note: During the evaluation of the accuracy, I used the total accuracy. One could also use "roc" or other metrics. I believe total accuracy is good enough to measure the performances.
+
+# Comments about the Analysis
+
+From all of our different datasets and methods, we can say that Random Forest performed well in every dataset. In most cases, it was the best method. We see that the decision tree method does not perform well for some types of datasets like regression. If the total accuracy is low, in other words, if the error rate is high, we might consider increasing the number of samples in the train data or we might change the ranges of the parameters like number of trees, lambda, etc.
+
+NOTE:
+
+.csv and .txt files can be found in [here](https://github.com/BU-IE-582/fall20-EzgiOralBoun/tree/master/files/HW4).
+
+- You can access the dataset #1 for further information from this [link](https://archive.ics.uci.edu/ml/datasets/South+German+Credit+%28UPDATE%29#).
+
+- You can access the dataset #2 for further information from this [link](https://archive.ics.uci.edu/ml/datasets/Grammatical+Facial+Expressions#).
+
+- You can access the dataset #3 for further information from this [link](https://archive.ics.uci.edu/ml/datasets/superconductivty+data#).
+
+- You can access the dataset #4 for further information from this [link](https://archive.ics.uci.edu/ml/datasets/Forest+type+mapping).
