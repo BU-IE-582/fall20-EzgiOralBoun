@@ -567,7 +567,7 @@ total_accuracy_sgb
 
 ## Parameters and Comments on Stochastic Gradient Boosting for Dataset #1
 
-Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 105. 
+Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 100. 
 
 After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 78% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 74% total accuracy (total_accuracy_sgb). 
 

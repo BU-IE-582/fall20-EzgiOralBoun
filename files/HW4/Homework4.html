@@ -1002,7 +1002,7 @@ total_accuracy_validation_sgb</code></pre>
 </div>
 <div id="parameters-and-comments-on-stochastic-gradient-boosting-for-dataset-1" class="section level2">
 <h2>Parameters and Comments on Stochastic Gradient Boosting for Dataset #1</h2>
-<p>Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 105.</p>
+<p>Above, the best depth, learning rate, number of trees parameters are found. The depth value is 5, the learning rate value is 0.17, and number of trees is 100.</p>
 <p>After finding the optimal parameters, I applied the method with those parameters and predicted the test data. Then I calculated the total accuracy by comparing the predicted values and the real values. Performing prediction with the optimal parameters to training data, I have obtained 78% total accuracy (total_accuracy_validation_sgb). With the prediction on test_data, I have obtained 74% total accuracy (total_accuracy_sgb).</p>
 <p>78% and 74% accuracy are good enough. This may show that using Stochastic Gradient Boosting for this dataset might be suitable. Furthermore, when we look at the accuracy of the train and the test data, we see that there is no obvious difference which means there is no overfitting or underfitting. We can say that our accuracy has decreased in the test.</p>
 <p>We have low train samples (around 480), if it was around 1000 samples we would have better performances.</p>
