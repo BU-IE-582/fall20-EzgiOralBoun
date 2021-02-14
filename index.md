@@ -1,5 +1,9 @@
 Welcome to my Progress Journal!
 
+# Project Link (Feb 15, 2021)
+
+[Here](files/Project/ProjectReport.html) you can find our project report. The R code for the best approach is in [here](files/Project/ProjectFinalCode.R).
+
 # Homework Links:
 
 ## Homework 0 (Oct 29, 2020)
