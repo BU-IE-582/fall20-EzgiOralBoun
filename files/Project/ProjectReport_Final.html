@@ -741,6 +741,7 @@ summary {
 <div id="best-approach" class="section level3">
 <h3>Best Approach</h3>
 <p>In our best approach, to achieve the class imbalance problem, we used ovun.sample function. We set the p parameter as “0.5”, we chose the method as “both” and used the seed value as “1”. We did not scale the train data and we did not use clustering. To model the train data, we used Random Forest method. In the randomForest function, the ntree parameter was 308 and nodesize was 3. We left the other parameters in the randomForest function as default. We did not perform post-processing.</p>
+<p>In our best approach, the score was 0.897 where the AUC was 0.927 and BER was 0.87.</p>
 </div>
 </div>
 <div id="results" class="section level1">
@@ -751,7 +752,7 @@ summary {
 <p>In our best prediction, our total score was 0.897 where the AUC was 0.927 and BER was 0.87.</p>
 <p>It is important to note that GBM and random forest models performed similarly in general.</p>
 <p>During our simulations, we also noticed that making extensive simulations helps to increase the prediction performances. In other words, it is important to try tuning the parameters by small step sizes. It is important to highlight that class imbalance techniques, train and test data separation and classification model operates randomly. Therefore, the prediction probabilities change in every trial for the same parameters.</p>
-<p>Below, we make a table to summarize our best scores in every model. We also present the method we use during that approach.</p>
+<p>Below, we make a table to summarize our best scores in every model. We also present the balancing method we use during that approach.</p>
 <table class=" lightable-classic" style="font-family: Cambria; width: auto !important; margin-left: auto; margin-right: auto;">
 <caption>
 Best Scores for Different Models
