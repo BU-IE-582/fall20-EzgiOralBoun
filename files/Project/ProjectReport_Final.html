@@ -682,11 +682,11 @@ summary {
 <div id="problem-description" class="section level3">
 <h3>Problem Description</h3>
 <p>In this project, we are given a train data and a test data from an unknown dataset. Our goal in this project is to build a binary classification model. We are asked to maximize two performance measures: Balanced Error Rate (BER) and Area under the ROC curve (AUC).</p>
-<p>It is important to mention that, there is a class imbalance in the train data. Therefore, the class imbalance problem must be achieved in this project.</p>
+<p>It is important to mention that, there is a class imbalance in the train data. Therefore, we have to cope with the class imbalance problem in this project.</p>
 </div>
 <div id="descriptive-analysis" class="section level3">
 <h3>Descriptive Analysis</h3>
-<p>In the dataset, there are 60 features and they are all numeric. When we analyze the train data we see that in every sample, features x50 and x52 have only a single value, 0. In the test data, we see that in every sample, features x37, x52 and x57 have only a single value, 0. Furthermore, at the features x36 and x42, we are observing some unexpected leaps. There are no missing values. Most of the features have binary values.</p>
+<p>In the dataset, there are 60 features and they are all numeric. When we analyze the train data we see that in each sample, features x50 and x52 have value, 0. In the test data, we see that in every sample, features x37, x52 and x57 have value, 0. Furthermore, at the features x36 and x42, we are observing some unexpected leaps. There are no missing values. Most of the features have binary values.</p>
 </div>
 <div id="about-the-proposed-approach" class="section level3">
 <h3>About the Proposed Approach</h3>
@@ -711,7 +711,7 @@ summary {
 <p>First, without overcoming the class imbalance, we made models by using decision tree, random forest, penalized regression and gradient boosting models. We used 10 folds cross-validation and made extensive simulations where we change multiple parameters for each approach. We used four different methods: penalized regression approach (PRA), decision tree, random forest and gradient boosting model (GBM). In decision tree model we changed the cp and minbucket parameters. In the random forest model, we tried to tune the ntree, nodesize and mtry parameters. Finally, for the gradient boosting model, we tried to tune the n.trees, interaction.depth and shrinkage parameters. Maximum score we got was 0.846 where the AUC was 0.924 and BER was 0.768. We got this result by using Random Forest model. Here we observe that the AUC performance is good however the BER is low.</p>
 <div id="scaling" class="section level3">
 <h3>Scaling</h3>
-<p>Then we scaled the features, and again tried decision tree, random forest and GBM by tuning the same parameters used in without class imbalance approach. Our score was 0.766 where the AUC was 0.792 and BER was 0.74. We observed that scaling affected our predictions in a bad way. Therefore, we did not prefer to use scaling in our other approaches.</p>
+<p>Then we scaled the features, and again tried decision tree, random forest and GBM by tuning the same parameters used in without overcoming the class imbalance approach. Our score was 0.766 where the AUC was 0.792 and BER was 0.74. We achieved this score with random forest approach by tuning the ntree, nodesize and mtry parameters. We observed that scaling affected our predictions in a bad way. Therefore, we did not prefer to use scaling in our other approaches.</p>
 </div>
 <div id="class-imbalance" class="section level3">
 <h3>Class Imbalance</h3>

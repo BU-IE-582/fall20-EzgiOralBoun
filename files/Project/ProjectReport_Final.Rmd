@@ -87,7 +87,7 @@ First, without overcoming the class imbalance, we made models by using decision 
 
 ### Scaling
 
-Then we scaled the features, and again tried decision tree, random forest and GBM by tuning the same parameters used in without class imbalance approach. Our score was 0.766 where the AUC was 0.792 and BER was 0.74. We observed that scaling affected our predictions in a bad way. Therefore, we did not prefer to use scaling in our other approaches.
+Then we scaled the features, and again tried decision tree, random forest and GBM by tuning the same parameters used in without overcoming the class imbalance approach. Our score was 0.766 where the AUC was 0.792 and BER was 0.74. We achieved this score with random forest approach by tuning the ntree, nodesize and mtry parameters. We observed that scaling affected our predictions in a bad way. Therefore, we did not prefer to use scaling in our other approaches.
 
 
 ### Class Imbalance
