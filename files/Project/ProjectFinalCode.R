@@ -48,9 +48,10 @@ data_in<-data_oversampled
 classImbalanceRaito_balanced <- table(data_in[,ncol(data_in)])
 classImbalanceRaito_balanced
 
-#### Eliminating the unnecessary coluns filled with all zeros ####
+#### Eliminating the unnecessary columns filled with all zeros ####
 
 data_in <- data_in[,-c(37,50,52,57)]
+IE_test <- IE582_Fall20_ProjectTest[,-c(37,50,52,57)]
 set.seed(123) # 
 
 #### Randomly choosing the model data and the test data to test the model ####
@@ -145,12 +146,12 @@ total_accuracy_validation_rf<-max(average_rf$total_accuracy)
 
 ntree<-average_rf[pointer,"ntree"]
 nodesize<-average_rf[pointer,"nodesize"]
-mtry<-average_rf[pointer,"mtry"]
+#mtry<-average_rf[pointer,"mtry"]
 
 # We found out that the values below gave the best performance during our analysis. In other words, these were the values that gave the maximum accuracy.
 ntree<-308
 nodesize<-3
-mtry<-5
+#mtry<-5
 ## Testing
 
 model_rf  <- randomForest(formula = as.factor(y) ~., data = data_train, ntree = ntree, nodesize = nodesize ,importance = T, na.action = na.omit)
@@ -165,7 +166,7 @@ total_accuracy_rf=sum(diag(class.pred_rf))/sum(class.pred_rf)
 total_accuracy_validation_rf
 total_accuracy_rf      # Just to check if everything is okay.
 
-model_rf  <- randomForest(formula = as.factor(y) ~., data = data_oversampled, ntree = ntree, nodesize = nodesize , importance = T, na.action = na.omit)
+model_rf  <- randomForest(formula = as.factor(y) ~., data = data_in, ntree = ntree, nodesize = nodesize , importance = T, na.action = na.omit)
 pred_rf   <- as.matrix((predict(model_rf,IE_test ,type = "prob")))
 pred<-as.matrix(pred_rf[,2])
 View(pred)
